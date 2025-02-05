@@ -1,7 +1,9 @@
 from os import path
 from datetime import datetime
 from random import randint
-import dotenv
+from time import sleep
+import threading, webbrowser, re
+import dotenv, requests
 
 class HandleAuthorisation():
     
@@ -32,10 +34,10 @@ class HandleAuthorisation():
         self.__env_path: str = path.join(path.dirname(__file__)[:-5], ".env")
     
     def is_dotenv_file_recent(self) -> bool:
-        try:
-            modded_unix = path.getmtime(self.__env_path)
-        except FileNotFoundError:
-            return False
+        # try:
+        modded_unix = path.getmtime(self.__env_path)
+        # except FileNotFoundError:
+            # raise FileNotFoundError(f"A valid .env file could not be found at {self.__env_path}")
         
         env_modified_time: datetime = datetime.fromtimestamp(modded_unix)
         now: datetime = datetime.now()
@@ -63,7 +65,12 @@ class HandleAuthorisation():
         return output
     
     def set_dotenv_file(self, client_token: str) -> bool:
-        if self.is_dotenv_file_recent() == False:
+        try:
+            recent_env_file = self.is_dotenv_file_recent()
+        except FileNotFoundError:
+            recent_env_file = False
+        
+        if recent_env_file == False:
             state = self.generate_state()
             
             with open(self.__env_path, "w") as file:
@@ -73,15 +80,37 @@ class HandleAuthorisation():
         return True
     
     def load_dotenv_file(self) -> bool:
-        if self.is_dotenv_file_recent() == False:
-            raise OSError(f"{self.__env_path} could not be found OR is more than 24 hours old")
+        output = "recent" if self.is_dotenv_file_recent() else "old"
         
         env_dict: dict[str, str | None] = dotenv.dotenv_values(self.__env_path)
         
         self._state = env_dict["CLIENT_STATE"]
         self.oauth_token = env_dict["CLIENT_TOKEN"]
         
+        return output
+    
+    def get_user_permission(self) -> bool:
+        url = f"https://freesound.org/apiv2/oauth2/authorize/?client_id={self.user_id}&response_type=code&state={self._state}"
+        browser_thread = threading.Thread(target=lambda: self.open_browser(url))
+        browser_thread.start()
+        
+        browser_thread.join(timeout=15.0)
+        if browser_thread.is_alive():
+            raise TimeoutError("Opening default browser timed out, user permissions could not be granted")
+        sleep(1)
+        
+        self._oauth_code = input("Please enter your authorisation code: ")
+        
+        regex_result = re.fullmatch("^[A-Z0-9]{40}$", self._oauth_code, flags=re.I)
+        if isinstance(regex_result, re.Match) == False:
+            raise(ValueError("Please enter a valid Freesound authorisation code, see https://freesound.org/docs/api/authentication.html"))
+        
         return True
     
-    def get_oauth_token(self):
+    def open_browser(self, url: str) -> None:
+        webbrowser.open(url)
+        
+    def request_oauth_token(self) -> str:
+        # url = 
+        # requests.post(url)
         pass
