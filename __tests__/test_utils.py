@@ -1,8 +1,45 @@
-import pytest, os, re
-import dotenv
+import os, re, io
+from datetime import datetime
+from collections.abc import Callable
+import pytest, dotenv
 from src.utils.utils import HandleAuthorisation
 
+@pytest.fixture(scope="class", autouse=True)
+def env_path(request: pytest.FixtureRequest):
+    request.cls.pytest_fixture_env_path = os.path.join(os.path.dirname(__file__)[:-9], "src", ".env")
+
 class TestHandleAuthorisation():
+    
+    @pytest.fixture
+    def remove_env_file(self):
+        def _remove_env_file(env_path: str) -> Callable[[str], None]:
+            if os.path.exists(env_path):
+                os.remove(env_path)
+        return _remove_env_file
+    
+    @pytest.fixture(name="Change env file modified date to 1 day ago")
+    def patch_env_file_modification_date_to_24_hours_ago(self, monkeypatch: pytest.MonkeyPatch):
+        now = datetime.timestamp(datetime.now())
+        yesterday = now - 86401
+        monkeypatch.setattr(os.path, "getmtime", lambda _: yesterday)
+        
+    @pytest.fixture(name="Prevent browser opening")
+    def prevent_browser_opening(self, monkeypatch: pytest.MonkeyPatch):
+        monkeypatch.setattr("webbrowser.open", lambda _: None)
+    
+    @pytest.fixture
+    def mock_input_to_terminal(self, monkeypatch: pytest.MonkeyPatch) -> Callable[[str], None]:
+        def mock_stdin(value: str) -> None:
+            monkeypatch.setattr('sys.stdin', io.StringIO(value))
+        return mock_stdin
+    
+    @pytest.fixture(name="Mock API request / response")
+    def mock_api_request_and_response(self, monkeypatch: pytest.MonkeyPatch) -> dict[str: str | int]:
+        monkeypatch.setattr("requests.post", lambda _: {
+            "access_token": "64c64660ceed813476b314f52136d9698e075622",
+            "scope": "read write read+write",
+            "expires_in": 86399,
+            "refresh_token": "0354489231f6a874331aer4927569297c7fea4d5"})
 
     class TestProperties():
         def test_has_property_user_id(self):
@@ -21,20 +58,17 @@ class TestHandleAuthorisation():
             with pytest.raises(TypeError):
                 HandleAuthorisation(True)
 
-    class TestCheckDotenvFile():
+    class TestIsDotenvFileRecent():
         
         @property
         def env_path(self):
-            return os.path.join(os.path.dirname(__file__)[:-9], "src", ".env")
+            return self.pytest_fixture_env_path
     
         @pytest.fixture(autouse=True)
-        def before_each(self):
-            if os.path.exists(self.env_path):
-                os.remove(self.env_path)
+        def before_each(self, remove_env_file: Callable[[str], None]):
+            remove_env_file(self.env_path)
         
         def test_returns_true_if_env_file_created_in_last_24_hours(self):
-            """ If .env file is older than 1 day, returns false.
-                This isn't really testable for fresh installs!"""
             ha = HandleAuthorisation("user id")
             
             with open(self.env_path, "w") as file:
@@ -42,12 +76,23 @@ class TestHandleAuthorisation():
 
             assert ha.is_dotenv_file_recent() == True
             
-        def test_returns_false_if_env_file_doesnt_exist(self):
+        @pytest.mark.usefixtures("Change env file modified date to 1 day ago")
+        def test_returns_false_if_env_file_more_than_24_hours_old(self):
             ha = HandleAuthorisation("user id")
+            
+            with open(self.env_path, "w") as file:
+                file.write("")
     
             assert ha.is_dotenv_file_recent() == False
+            
+        def test_raises_error_if_env_file_not_found(self):
+            ha = HandleAuthorisation("user id")
+            
+            with pytest.raises(FileNotFoundError):
+                ha.is_dotenv_file_recent()
 
     class TestGenerateState():
+        
         def test_returns_a_string(self):
             ha = HandleAuthorisation("user id")
             
@@ -84,16 +129,15 @@ class TestHandleAuthorisation():
         
         @property
         def env_path(self):
-            return os.path.join(os.path.dirname(__file__)[:-9], "src", ".env")
+            return self.pytest_fixture_env_path
         
         @property
         def valid_env_vars(self):
             return ["CLIENT_ID", "CLIENT_STATE", "CLIENT_TOKEN"]
         
         @pytest.fixture(autouse=True)
-        def before_each(self):
-            if os.path.exists(self.env_path):
-                os.remove(self.env_path)
+        def before_each(self, remove_env_file: Callable[[str], None]):
+            remove_env_file(self.env_path)
         
         def test_creates_a_env_file(self):
             ha = HandleAuthorisation("user id")
@@ -154,14 +198,14 @@ class TestHandleAuthorisation():
             assert isinstance(regex_result, re.Match) == True
 
     class TestLoadDotEnv():
+        
         @property
         def env_path(self):
-            return os.path.join(os.path.dirname(__file__)[:-9], "src", ".env")
+            return self.pytest_fixture_env_path
         
         @pytest.fixture(autouse=True)
-        def before_each(self):
-            if os.path.exists(self.env_path):
-                os.remove(self.env_path)
+        def before_each(self, remove_env_file: Callable[[str], None]):
+            remove_env_file(self.env_path)
 
         def test_if_file_is_recent_updates_state_and_oauth_with_value_from_env_file(self):
             ha = HandleAuthorisation("user id")
@@ -171,37 +215,90 @@ class TestHandleAuthorisation():
             env_values = env_dict.values()
             
             ha.load_dotenv_file()
-            state = ha._state
-            oauth = ha.oauth_token
             
-            assert state in env_values
-            assert oauth in env_values
+            assert ha._state in env_values
+            assert ha.oauth_token in env_values
             
-        def test_returns_true_on_success(self):
-            """Returns false if file more than 24 hours old,
-            can't test for that!"""
-            
+        @pytest.mark.usefixtures("Change env file modified date to 1 day ago")
+        def test_if_file_is_old_updates_oauth_with_value_from_env_file(self):
             ha = HandleAuthorisation("user id")
             ha.set_dotenv_file("token")
             
-            assert ha.load_dotenv_file() == True
+            env_dict = dotenv.dotenv_values(self.env_path)
+            env_values = env_dict.values()
             
-        def test_raises_error_if_env_file_missing_or_not_recent(self):
+            ha.load_dotenv_file()
+            
+            assert ha.oauth_token in env_values
+            
+        def test_returns_string_recent_on_success(self):
+            ha = HandleAuthorisation("user id")
+            ha.set_dotenv_file("token")
+            
+            assert ha.load_dotenv_file() == "recent"
+            
+        @pytest.mark.usefixtures("Change env file modified date to 1 day ago")
+        def test_returns_string_old_if_env_file_is_not_recent(self):
+            ha = HandleAuthorisation("user id")
+            ha.set_dotenv_file("token")
+            
+            assert ha.load_dotenv_file() == "old"
+                
+        def test_raises_error_if_env_file_missing(self):
             ha = HandleAuthorisation("user id")
             
-            with pytest.raises(OSError):
+            with pytest.raises(FileNotFoundError):
                 ha.load_dotenv_file()
 
+    @pytest.mark.usefixtures("Prevent browser opening")
+    class TestGetUserPermission():
+        
+        def test_opens_browser_window_and_allows_user_to_enter_oauth_code(self, mock_input_to_terminal: Callable[[str], None]):
+            ha = HandleAuthorisation("user id")
+            
+            mock_input_to_terminal('6Wc9r2zbAcatxfjnAB63hzsOElGCtlbXmn3ZHzJh')
+            
+            ha.get_user_permission()
+            
+            assert type(ha._oauth_code) == str
+            assert len(ha._oauth_code) == 40
+            
+            regex_result = re.fullmatch("^[A-Z0-9]{40}$", ha._oauth_code, flags=re.I)
+            assert isinstance(regex_result, re.Match) == True
+            
+        def test_returns_true_on_success(self, mock_input_to_terminal: Callable[[str], None]):
+            ha = HandleAuthorisation("user id")
+            
+            mock_input_to_terminal('6Wc9r2zbAcatxfjnAB63hzsOElGCtlbXmn3ZHzJh')
+            assert ha.get_user_permission() == True
+            
+        def test_raises_error_on_invalid_oauth_code(self, mock_input_to_terminal: Callable[[str], None]):
+            ha = HandleAuthorisation("user id")
+            
+            mock_input_to_terminal('!Wc9r2zbAcatxfjnAB63hzsOElGCtlbXmn3ZHzJh')        
+            with pytest.raises(ValueError):
+                ha.get_user_permission()
+
+    @pytest.mark.usefixtures("Mock API request / response")
+    class TestRequestOauthToken():
+        
+        def test_updates_oauth_token_property_with_access_token(self):
+            ha = HandleAuthorisation("user id")
+            
+            ha.request_oauth_token()
+            
+            assert ha.oauth_token == "0354489231f6a874331aer4927569297c7fea4d5"
+
+    @pytest.mark.skip
     class TestGetOauthToken():
         
         @property
         def env_path(self):
-            return os.path.join(os.path.dirname(__file__)[:-9], "src", ".env")
+            return self.pytest_fixture_env_path
         
         @pytest.fixture(autouse=True)
-        def before_each(self):
-            if os.path.exists(self.env_path):
-                os.remove(self.env_path)
+        def before_each(self, remove_env_file: Callable[[str], None]):
+            remove_env_file(self.env_path)
 
         def test_gets_an_oauth_token_and_updates_env_file(self):
             ha = HandleAuthorisation("user id")
@@ -211,9 +308,16 @@ class TestHandleAuthorisation():
             env_dict = dotenv.dotenv_values(self.env_path)
             
             assert env_dict["CLIENT_TOKEN"] != None
-
+    
+    ### request_oauth_token
+    # updates oauth_token property with access_token
+    # invokes set_dotenv_file with refresh__token
+    # Returns an access_token string
+    
     ### get_oauth_token
-    # gets an oauth_token and updates .env file
-    # updates oauth_token property
-    # returns oauth_token on success
-    # returns an error message on failure
+    # if .env file is missing, invokes get_user_permission
+    # if .env file is missing, creates valid .env file
+    # if .env file is old, invokes load_dotenv_file
+    # if .env file is old, invokes request_oauth_token with refresh_token
+    # if .env file is recent, invokes load_dotenv_file
+    # if .env file is recent, returns oauth_token
