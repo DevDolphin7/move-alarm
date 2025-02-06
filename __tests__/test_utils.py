@@ -1,7 +1,7 @@
 import os, re, io
 from datetime import datetime
 from collections.abc import Callable
-import pytest, dotenv
+import pytest, response, dotenv
 from src.utils.utils import HandleAuthorisation
 
 @pytest.fixture(scope="class", autouse=True)
@@ -35,11 +35,25 @@ class TestHandleAuthorisation():
     
     @pytest.fixture(name="Mock API request / response")
     def mock_api_request_and_response(self, monkeypatch: pytest.MonkeyPatch) -> dict[str: str | int]:
-        monkeypatch.setattr("requests.post", lambda _: {
-            "access_token": "64c64660ceed813476b314f52136d9698e075622",
-            "scope": "read write read+write",
-            "expires_in": 86399,
-            "refresh_token": "0354489231f6a874331aer4927569297c7fea4d5"})
+        # monkeypatch.setattr("requests.post", lambda _, data: None)
+        
+        # monkeypatch.setattr("requests.Response.json", lambda: {
+        #     "access_token": "64c64660ceed813476b314f52136d9698e075622",
+        #     "scope": "read write read+write",
+        #     "expires_in": 86399,
+        #     "refresh_token": "0354489231f6a874331aer4927569297c7fea4d5"})
+        
+        response.add(
+                responses.POST,
+                "https://freesound.org/apiv2/oauth2/access_token/",
+                json={
+                "access_token": "64c64660ceed813476b314f52136d9698e075622",
+                "scope": "read write read+write",
+                "expires_in": 86399,
+                "refresh_token": "0354489231f6a874331aer4927569297c7fea4d5"
+                },
+                status=200,
+            )
 
     class TestProperties():
         def test_has_property_user_id(self):
@@ -197,7 +211,7 @@ class TestHandleAuthorisation():
 
             assert isinstance(regex_result, re.Match) == True
 
-    class TestLoadDotEnv():
+    class TestLoadDotenvFile():
         
         @property
         def env_path(self):
@@ -284,6 +298,7 @@ class TestHandleAuthorisation():
         
         def test_updates_oauth_token_property_with_access_token(self):
             ha = HandleAuthorisation("user id")
+            ha._oauth_code = "mock code"
             
             ha.request_oauth_token()
             

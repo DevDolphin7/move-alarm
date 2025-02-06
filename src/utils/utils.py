@@ -34,11 +34,7 @@ class HandleAuthorisation():
         self.__env_path: str = path.join(path.dirname(__file__)[:-5], ".env")
     
     def is_dotenv_file_recent(self) -> bool:
-        # try:
         modded_unix = path.getmtime(self.__env_path)
-        # except FileNotFoundError:
-            # raise FileNotFoundError(f"A valid .env file could not be found at {self.__env_path}")
-        
         env_modified_time: datetime = datetime.fromtimestamp(modded_unix)
         now: datetime = datetime.now()
         time_since_modifying = now - env_modified_time
@@ -111,6 +107,14 @@ class HandleAuthorisation():
         webbrowser.open(url)
         
     def request_oauth_token(self) -> str:
-        # url = 
-        # requests.post(url)
-        pass
+        token_response = requests.post(
+            "https://freesound.org/apiv2/oauth2/access_token/",
+            data={"client_id": self.user_id,
+                  "client_secret": "self.__client_secret",
+                  "grant_type": "authorization_code",
+                  "code": self._oauth_code}
+        )
+
+        token = token_response.json()
+        
+        self.oauth_token = token["access_token"]
