@@ -100,6 +100,7 @@ class HandleAuthorisation:
             with open(self.__env_path, "w") as file:
                 file.write(
                     f"CLIENT_ID={self.user_id}\n"
+                    + f"CLIENT_CODE={self._oauth_code}\n"
                     + f"CLIENT_STATE={state}\n"
                     + f"CLIENT_TOKEN={client_token}"
                 )
@@ -128,7 +129,7 @@ class HandleAuthorisation:
         sleep(1)
 
         self._oauth_code = input("Please enter your authorisation code: ")
-
+        print(self._oauth_code, "<<<<<<<<<<>>>>>>>>>>")
         regex_result = re.fullmatch("^[A-Z0-9]{40}$", self._oauth_code, flags=re.I)
         if isinstance(regex_result, re.Match) == False:
             raise (
@@ -153,5 +154,27 @@ class HandleAuthorisation:
             },
         )
 
-        token = token_response.json()
-        self.oauth_token = token["access_token"]
+        match token_response.status_code:
+            case 200:
+                token = token_response.json()
+                self.oauth_token = token["access_token"]
+
+                self.set_dotenv_file(token["refresh_token"])
+                return self.oauth_token
+            case 401 | 429:
+                raise ConnectionRefusedError(token_response.text)
+            case _:
+                raise ConnectionError(token_response.text)
+
+    def get_token(self) -> str:
+        try:
+            self.is_dotenv_file_recent()
+        except FileNotFoundError:
+            if self.get_user_permission():
+                self.set_dotenv_file(self._oauth_code)
+            else:
+                return
+
+        self.load_dotenv_file()
+
+        return self.request_oauth_token()
