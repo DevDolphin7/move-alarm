@@ -28,9 +28,9 @@ class HandleAuthorisation:
         self.__oauth_token = token
 
     def __init__(self, user_id: str) -> None:
-        self.user_id: str = user_id
+        self.user_id = user_id
         self._state: str | None = None
-        self.oauth_token: str | None = None
+        self.oauth_token = None
 
         self.__env_path: str = path.join(path.dirname(__file__)[:-5], ".env")
 
@@ -106,7 +106,7 @@ class HandleAuthorisation:
                 )
         return True
 
-    def load_dotenv_file(self) -> bool:
+    def load_dotenv_file(self) -> str:
         output = "recent" if self.is_dotenv_file_recent() else "old"
 
         env_dict: dict[str, str | None] = dotenv.dotenv_values(self.__env_path)
@@ -143,7 +143,7 @@ class HandleAuthorisation:
     def open_browser(self, url: str) -> None:
         webbrowser.open(url)
 
-    def request_oauth_token(self) -> str:
+    def request_oauth_token(self) -> str | None:
         token_response = requests.post(
             "https://freesound.org/apiv2/oauth2/access_token/",
             data={
@@ -166,14 +166,14 @@ class HandleAuthorisation:
             case _:
                 raise ConnectionError(token_response.text)
 
-    def get_token(self) -> str:
+    def get_token(self) -> str | None:
         try:
             self.is_dotenv_file_recent()
         except FileNotFoundError:
             if self.get_user_permission():
                 self.set_dotenv_file(self._oauth_code)
             else:
-                return
+                return None
 
         self.load_dotenv_file()
 
