@@ -9,30 +9,36 @@ import dotenv, requests
 class HandleAuthorisation:
 
     @property
-    def user_id(self) -> str:
-        return self.__user_id
+    def client_id(self) -> str | None:
+        return self.__client_id
 
-    @user_id.setter
-    def user_id(self, id: str) -> None:
+    @client_id.setter
+    def client_id(self, id: str) -> None:
         if type(id) == str:
-            self.__user_id = id
+            self.__client_id = id
         else:
-            raise TypeError("user_id must be a string")
+            raise TypeError("client_id must be a string")
 
     @property
     def oauth_token(self) -> str | None:
         return self.__oauth_token
 
     @oauth_token.setter
-    def oauth_token(self, token: str) -> None:
+    def oauth_token(self, token: str | None) -> None:
         self.__oauth_token = token
 
-    def __init__(self, user_id: str) -> None:
-        self.user_id = user_id
-        self._state: str | None = None
-        self.oauth_token = None
-
+    def __init__(self, client_id: str = "Load from .env file") -> None:
         self.__env_path: str = path.join(path.dirname(__file__)[:-5], ".env")
+
+        if client_id != "Load from .env file":
+            self.client_id = client_id
+        else:
+            self.load_dotenv_file()
+
+        self._state: str | None = None
+        self.__client_secret: str | None = None
+        self._oauth_code: str | None = None
+        self.oauth_token = None
 
     def is_dotenv_file_recent(self) -> bool:
         modded_unix = path.getmtime(self.__env_path)
@@ -99,10 +105,10 @@ class HandleAuthorisation:
 
             with open(self.__env_path, "w") as file:
                 file.write(
-                    f"CLIENT_ID={self.user_id}\n"
-                    + f"CLIENT_CODE={self._oauth_code}\n"
+                    f"CLIENT_ID={self.client_id}\n"
+                    + f"CLIENT_SECRET={self.__client_secret}\n"
                     + f"CLIENT_STATE={state}\n"
-                    + f"CLIENT_TOKEN={client_token}"
+                    + f"REFRESH_TOKEN={client_token}"
                 )
         return True
 
@@ -111,13 +117,15 @@ class HandleAuthorisation:
 
         env_dict: dict[str, str | None] = dotenv.dotenv_values(self.__env_path)
 
+        self.client_id = env_dict["CLIENT_ID"]
+        self.__client_secret = env_dict["CLIENT_SECRET"]
         self._state = env_dict["CLIENT_STATE"]
-        self.oauth_token = env_dict["CLIENT_TOKEN"]
+        self.oauth_token = env_dict["REFRESH_TOKEN"]
 
         return output
 
     def get_user_permission(self) -> bool:
-        url = f"https://freesound.org/apiv2/oauth2/authorize/?client_id={self.user_id}&response_type=code&state={self._state}"
+        url = f"https://freesound.org/apiv2/oauth2/authorize/?client_id={self.client_id}&response_type=code&state={self._state}"
         browser_thread = threading.Thread(target=lambda: self.open_browser(url))
         browser_thread.start()
 
@@ -129,7 +137,7 @@ class HandleAuthorisation:
         sleep(1)
 
         self._oauth_code = input("Please enter your authorisation code: ")
-        print(self._oauth_code, "<<<<<<<<<<>>>>>>>>>>")
+
         regex_result = re.fullmatch("^[A-Z0-9]{40}$", self._oauth_code, flags=re.I)
         if isinstance(regex_result, re.Match) == False:
             raise (
@@ -144,14 +152,21 @@ class HandleAuthorisation:
         webbrowser.open(url)
 
     def request_oauth_token(self) -> str | None:
+        post_data = {
+            "client_id": self.client_id,
+            "client_secret": "self.__client_secret",
+        }
+
+        if self._oauth_code == None:
+            post_data["grant_type"] = "refresh_token"
+            post_data["refresh_token"] = str(self.oauth_token)
+        else:
+            post_data["grant_type"] = "authorization_code"
+            post_data["code"] = self._oauth_code
+
         token_response = requests.post(
             "https://freesound.org/apiv2/oauth2/access_token/",
-            data={
-                "client_id": self.user_id,
-                "client_secret": "self.__client_secret",
-                "grant_type": "authorization_code",
-                "code": self._oauth_code,
-            },
+            data=post_data,
         )
 
         match token_response.status_code:
@@ -171,7 +186,7 @@ class HandleAuthorisation:
             self.is_dotenv_file_recent()
         except FileNotFoundError:
             if self.get_user_permission():
-                self.set_dotenv_file(self._oauth_code)
+                self.set_dotenv_file("None")
             else:
                 return None
 
