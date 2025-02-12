@@ -9,7 +9,7 @@ import dotenv, requests
 class HandleAuthorisation:
 
     @property
-    def client_id(self) -> str | None:
+    def client_id(self) -> str:
         return self.__client_id
 
     @client_id.setter
@@ -20,12 +20,20 @@ class HandleAuthorisation:
             raise TypeError("client_id must be a string")
 
     @property
-    def oauth_token(self) -> str | None:
-        return self.__oauth_token
+    def oauth_code(self) -> str | None:
+        return self.__oauth_code
 
-    @oauth_token.setter
-    def oauth_token(self, token: str | None) -> None:
-        self.__oauth_token = token
+    @oauth_code.setter
+    def oauth_code(self, code: str | None) -> None:
+        if code != None:
+            regex_result = re.fullmatch("^[A-Z0-9]{40}$", code, flags=re.I)
+            if isinstance(regex_result, re.Match) == False:
+                raise (
+                    ValueError(
+                        "Please enter a valid Freesound authorisation code, see https://freesound.org/docs/api/authentication.html"
+                    )
+                )
+        self.__oauth_code = code
 
     def __init__(self, client_id: str = "Load from .env file") -> None:
         self.__env_path: str = path.join(path.dirname(__file__)[:-5], ".env")
@@ -37,8 +45,8 @@ class HandleAuthorisation:
 
         self._state: str | None = None
         self.__client_secret: str | None = None
-        self._oauth_code: str | None = None
-        self.oauth_token = None
+        self.oauth_code = None
+        self.oauth_token: str | None = None
 
     def is_dotenv_file_recent(self) -> bool:
         modded_unix = path.getmtime(self.__env_path)
@@ -117,7 +125,7 @@ class HandleAuthorisation:
 
         env_dict: dict[str, str | None] = dotenv.dotenv_values(self.__env_path)
 
-        self.client_id = env_dict["CLIENT_ID"]
+        self.client_id = str(env_dict["CLIENT_ID"])
         self.__client_secret = env_dict["CLIENT_SECRET"]
         self._state = env_dict["CLIENT_STATE"]
         self.oauth_token = env_dict["REFRESH_TOKEN"]
@@ -136,15 +144,7 @@ class HandleAuthorisation:
             )
         sleep(1)
 
-        self._oauth_code = input("Please enter your authorisation code: ")
-
-        regex_result = re.fullmatch("^[A-Z0-9]{40}$", self._oauth_code, flags=re.I)
-        if isinstance(regex_result, re.Match) == False:
-            raise (
-                ValueError(
-                    "Please enter a valid Freesound authorisation code, see https://freesound.org/docs/api/authentication.html"
-                )
-            )
+        self.oauth_code = input("Please enter your authorisation code: ")
 
         return True
 
@@ -157,12 +157,12 @@ class HandleAuthorisation:
             "client_secret": "self.__client_secret",
         }
 
-        if self._oauth_code == None:
+        if self.oauth_code == None:
             post_data["grant_type"] = "refresh_token"
             post_data["refresh_token"] = str(self.oauth_token)
         else:
             post_data["grant_type"] = "authorization_code"
-            post_data["code"] = self._oauth_code
+            post_data["code"] = self.oauth_code
 
         token_response = requests.post(
             "https://freesound.org/apiv2/oauth2/access_token/",
