@@ -537,6 +537,3 @@ class TestHandleAuthorisation:
             token = ha.get_token()
 
             assert token == "64c64660ceed813476b314f52136d9698e075622"
-        
-        def test_github_action(self):
-            assert 0 == 1
