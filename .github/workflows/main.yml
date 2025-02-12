@@ -26,5 +26,7 @@ jobs:
           pipx install poetry==2.0.1
           pipx ensurepath
           poetry install --with test
+      - name: Run Linting
+        run: poetry run mypy src/
       - name: Run tests
         run: poetry run pytest -v -s __tests__/
