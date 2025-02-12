@@ -161,9 +161,9 @@ class TestHandleAuthorisation:
             ha = HandleAuthorisation("")
             assert isinstance(ha.client_id, str)
 
-        def test_has_property_oauth_token(self):
+        def test_has_property_oauth_code(self):
             ha = HandleAuthorisation("")
-            assert isinstance(ha.oauth_token, (str, type(None)))
+            assert isinstance(ha.oauth_code, (str, type(None)))
 
         def test_invoking_with_string_sets_client_id(self):
             ha = HandleAuthorisation("client id")
@@ -404,10 +404,10 @@ class TestHandleAuthorisation:
 
             ha.get_user_permission()
 
-            assert type(ha._oauth_code) == str
-            assert len(ha._oauth_code) == 40
+            assert type(ha.oauth_code) == str
+            assert len(ha.oauth_code) == 40
 
-            regex_result = re.fullmatch("^[A-Z0-9]{40}$", ha._oauth_code, flags=re.I)
+            regex_result = re.fullmatch("^[A-Z0-9]{40}$", ha.oauth_code, flags=re.I)
             assert isinstance(regex_result, re.Match) == True
 
         def test_returns_true_on_success(self, mock_input_to_terminal):
@@ -592,4 +592,4 @@ class TestHandleAuthorisation:
             token = ha.get_token()
 
             assert token == "64c64660ceed813476b314f52136d9698e075622"
-            assert ha._oauth_code == None
+            assert ha.oauth_code == None
