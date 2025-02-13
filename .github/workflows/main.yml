@@ -22,13 +22,12 @@ jobs:
       - name: Check which bash
         run: |
           which bash
-          ln -s "$(which bash)" /usr/bin/bash
       - name: Check for test skips
         run: >
           skips="$(grep -r '@pytest.mark.skip' ./__tests__/)"; \
             if ["$skips" == ""]; \
-              then echo "No pytest skips, happy days!"; \
-              else echo "Skips were found in pytest, please remove them before merging to main" && exit 1; \
+            then echo "No pytest skips, happy days!"; \
+            else echo "Skips were found in pytest, please remove them before merging to main" && exit 1; \
             fi
       - name: Install dependencies
         run: |
