@@ -26,7 +26,7 @@ class HandleAuthorisation:
     @oauth_code.setter
     def oauth_code(self, code: str | None) -> None:
         if code != None:
-            regex_result = re.fullmatch("^[A-Z0-9]{40}$", code, flags=re.I)
+            regex_result = re.fullmatch("^[A-Z0-9]{25,45}$", code, flags=re.I)
             if isinstance(regex_result, re.Match) == False:
                 raise (
                     ValueError(
@@ -103,21 +103,15 @@ class HandleAuthorisation:
         return output
 
     def set_dotenv_file(self, client_token: str) -> bool:
-        try:
-            recent_env_file = self.is_dotenv_file_recent()
-        except FileNotFoundError:
-            recent_env_file = False
+        state = self.generate_state()
 
-        if recent_env_file == False:
-            state = self.generate_state()
-
-            with open(self.__env_path, "w") as file:
-                file.write(
-                    f"CLIENT_ID={self.client_id}\n"
-                    + f"CLIENT_SECRET={self.__client_secret}\n"
-                    + f"CLIENT_STATE={state}\n"
-                    + f"REFRESH_TOKEN={client_token}"
-                )
+        with open(self.__env_path, "w") as file:
+            file.write(
+                f"CLIENT_ID={self.client_id}\n"
+                + f"CLIENT_SECRET={self.__client_secret}\n"
+                + f"CLIENT_STATE={state}\n"
+                + f"REFRESH_TOKEN={client_token}"
+            )
         return True
 
     def load_dotenv_file(self) -> str:
@@ -154,7 +148,7 @@ class HandleAuthorisation:
     def request_oauth_token(self) -> str | None:
         post_data = {
             "client_id": self.client_id,
-            "client_secret": "self.__client_secret",
+            "client_secret": self.__client_secret,
         }
 
         if self.oauth_code == None:
