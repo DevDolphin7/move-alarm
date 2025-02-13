@@ -19,13 +19,13 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
+      - name: Set PYTEST_SKIPS env var
+        run: echo "PYTEST_SKIPS=" $(grep -r "@pytest.mark.skip" ./__tests__/) >> $GITHUB_ENV
       - name: Check for test skips
         run: >
-          bash -c
-          SKIPS=$(grep -r "@pytest.mark.skip" ./__tests__/);
-          if [[ $SKIPS == "" ]];
+          if [[ $PYTEST_SKIPS == "" ]];
           then echo "No pytest skips, happy days!";
-          else echo "Skips were found in pytest, please remove them before merging to main" && exit 1;
+          else echo "Skips were found in pytest, please remove them before merging to main" & exit 1;
           fi
       - name: Install dependencies
         run: |
