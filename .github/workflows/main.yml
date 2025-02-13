@@ -19,14 +19,12 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
+      - name: Check grep
+        run: bash -c 'grep -r "@pytest.mark.skip" ./__tests__/' | xargs echo
       - name: Debug info
-        run: |
-          bash -c 'grep -r "@pytest.mark.skip" ./__tests__/'
-          >
-            echo
-            "Hello world!"
-        env:
-          PYTEST_SKIPS: $(bash -c 'grep -r "@pytest.mark.skip" ./__tests__/')
+        run: echo "PYTEST_SKIPS=" $(bash -c 'grep -r "@pytest.mark.skip" ./__tests__/') >> $GITHUB_ENV
+      - name: Debug further info
+        run: echo "PYTEST_SKIPS variable = $PYTEST_SKIPS"
       - name: Check for test skips
         run: >
           PYTEST_SKIPS=$(grep -r "@pytest.mark.skip" ./__tests__/);
