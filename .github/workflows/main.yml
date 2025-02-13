@@ -23,7 +23,7 @@ jobs:
         run: >
           bash -c
           skips="$(grep -r '@pytest.mark.skip' ./__tests__/)";
-          if ["$skips" == ""];
+          if [skips == ""];
           then echo "No pytest skips, happy days!";
           else echo "Skips were found in pytest, please remove them before merging to main" && exit 1;
           fi
