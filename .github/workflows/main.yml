@@ -22,7 +22,7 @@ jobs:
       - name: Check grep
         run: bash -c 'grep -r "@pytest.mark.skip" ./__tests__/' | xargs echo
       - name: Debug info
-        run: echo "PYTEST_SKIPS=" $(bash -c 'grep -r "@pytest.mark.skip" ./__tests__/') >> $GITHUB_ENV
+        run: echo "PYTEST_SKIPS=" $(bash -c 'grep -r "@pytest.mark.usefixture" ./__tests__/') >> $GITHUB_ENV
       - name: Debug further info
         run: echo "PYTEST_SKIPS variable = $PYTEST_SKIPS"
       - name: Check for test skips
