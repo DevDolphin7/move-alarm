@@ -21,11 +21,10 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - name: Check for test skips
         run: >
-          bash -c
-          SKIPS=$(grep -r "@pytest.mark.skip" ./__tests__/);
-          if [[ $SKIPS == "" ]];
+          PYTEST_SKIPS=$(grep -r "@pytest.mark.skip" ./__tests__/);
+          if [[ $PYTEST_SKIPS == "" ]];
           then echo "No pytest skips, happy days!";
-          else echo "Skips were found in pytest, please remove them before merging to main" && exit 1;
+          else echo "Skips were found in pytest, please remove them before merging to main" & exit 1;
           fi
       - name: Install dependencies
         run: |
