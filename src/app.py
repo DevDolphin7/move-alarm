@@ -1,4 +1,4 @@
-from utils.utils import HandleAuthorisation
+from src.utils.utils import HandleAuthorisation
 
 
 def get_token():
