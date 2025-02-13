@@ -19,6 +19,17 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
+      - name: Debug info
+        run: |
+          grep -r "@pytest.mark.skip" ./__tests__/
+          echo "Echod variable $PYTEST_SKIPS"
+          >
+            echo
+            "hello"
+          |
+          echo "world!"
+        env:
+          PYTEST_SKIPS: grep -r "@pytest.mark.skip" ./__tests__/
       - name: Check for test skips
         run: >
           PYTEST_SKIPS=$(grep -r "@pytest.mark.skip" ./__tests__/);
