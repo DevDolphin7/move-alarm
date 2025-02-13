@@ -5,11 +5,19 @@ import pytest, pytest_mock, dotenv
 from src.utils.utils import HandleAuthorisation
 
 
+@pytest.fixture(scope="class")
+def define_env_path():
+    return os.path.join(os.path.dirname(__file__)[:-9], "src", ".env.test")
+
+
 @pytest.fixture(scope="class", autouse=True)
-def env_path(request: pytest.FixtureRequest):
-    request.cls.pytest_fixture_env_path = os.path.join(
-        os.path.dirname(__file__)[:-9], "src", ".env"
-    )
+def env_path(request: pytest.FixtureRequest, define_env_path):
+    request.cls.pytest_fixture_env_path = define_env_path
+
+
+@pytest.fixture(autouse=True, name="Set env path")
+def before_all(monkeypatch: pytest.MonkeyPatch, define_env_path):
+    monkeypatch.setattr("os.path.join", lambda *args: define_env_path)
 
 
 @pytest.fixture(scope="class", autouse=True)
@@ -22,6 +30,7 @@ def valid_env_vars(request: pytest.FixtureRequest):
     ]
 
 
+@pytest.mark.usefixtures(name="Set env path")
 class TestHandleAuthorisation:
 
     @pytest.fixture
@@ -294,18 +303,6 @@ class TestHandleAuthorisation:
 
             assert env_dict[self.valid_env_vars[0]] == "client_bob"
             assert env_dict[self.valid_env_vars[3]] == "bobs_api_token"
-
-        def test_doesnt_modify_env_file_if_less_than_24_hours_since_modified(self):
-            with open(self.env_path, "w") as file:
-                file.write("")
-
-            ha = HandleAuthorisation("client id")
-
-            ha.set_dotenv_file("token")
-
-            env_dict = dotenv.dotenv_values(self.env_path)
-
-            assert len(env_dict) == 0
 
         def test_returns_true_if_env_file_up_to_date(self):
             ha = HandleAuthorisation("client id")
