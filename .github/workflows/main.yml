@@ -20,7 +20,7 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
       - name: Set PYTEST_SKIPS env var
-        run: echo "PYTEST_SKIPS=" $(bash -c 'grep -r "@pytest.mark.skip" ./__tests__/') >> $GITHUB_ENV
+        run: echo "PYTEST_SKIPS=" $(grep -r "@pytest.mark.skip" ./__tests__/) >> $GITHUB_ENV
       - name: Check for test skips
         run: >
           if [[ $PYTEST_SKIPS == "" ]];
