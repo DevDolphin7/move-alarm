@@ -19,6 +19,13 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
+      - name: Check for test skips
+      - run: |
+          skips="$(grep -r '@pytest.mark.skip' ./__tests__/)"; \
+            if ["$skips" == ""]; \
+              then echo "No pytest skips, happy days!"; \
+              else echo "Skips were found in pytest, please remove them before merging to main" && exit 1; \
+            fi
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
