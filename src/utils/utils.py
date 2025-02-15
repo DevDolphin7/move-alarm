@@ -41,7 +41,10 @@ class HandleAuthorisation:
         if client_id != "Load from .env file":
             self.client_id = client_id
         else:
-            self.load_dotenv_file()
+            try:
+                self.load_dotenv_file()
+            except FileNotFoundError:
+                self.client_id = input("Please enter the client_id: ")
 
         self._state: str | None = None
         self.oauth_code = None
