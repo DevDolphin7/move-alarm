@@ -12,40 +12,32 @@ The code is written in [python3.12](https://www.python.org/downloads/release/pyt
 
 Version control is handled by [git](https://git-scm.com/downloads).
 
+Some Linux OS include Debian require `python3-dev`, `libasound2-dev`, `pulseaudio`.
+
+For exmaple, on Debian:
+
+> `sudo apt-get install -y python3-dev libasound2-dev pulseaudio`
+
 Package dependencies and environments are managed by [poetry](https://python-poetry.org/docs/#installation).
 
-```CLI
-git clone https://github.com/DevDolphin7/move-alarm.git
-```
+> git clone https://github.com/DevDolphin7/move-alarm.git
 
-```CLI
-cd move-alarm
-```
+> cd move-alarm
 
 ### Installing Dependencies
 
-```CLI
-poetry install
-```
+> poetry install
 
 ### Testing
 
-```CLI
-poetry run pytest
-```
-
-> 💡 All tests are stored in `__tests__` in the project root folder.
+> poetry run pytest **tests**/
 
 ### Running The App
 
 For Linux / MacOS / WSL:
 
-```CLI
-poetry run python3 ./src/app.py
-```
+> poetry run python3 ./src/app.py
 
 For Windows:
 
-```CLI
-poetry run python3 .\src\app.py
-```
+> poetry run python3 .\src\app.py
