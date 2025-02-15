@@ -157,13 +157,8 @@ class TestHandleAuthorisation:
             return self.pytest_fixture_valid_env_vars
 
         @pytest.fixture(autouse=True)
-        def before_each(
-            self,
-            remove_env_file,
-            create_mock_env_file,
-        ):
+        def before_each(self, remove_env_file):
             remove_env_file(self.env_path)
-            create_mock_env_file(self.valid_env_vars, self.env_path)
 
         def test_has_property_client_id(self):
             ha = HandleAuthorisation("")
@@ -188,6 +183,15 @@ class TestHandleAuthorisation:
 
             ha = HandleAuthorisation()
             assert ha.client_id == "mock_data"
+
+        def test_if_no_client_id_or_env_file_asks_user_for_id(
+            self, mock_input_to_terminal
+        ):
+            mock_input_to_terminal("User 1")
+
+            ha = HandleAuthorisation()
+
+            assert ha.client_id == "User 1"
 
     class TestIsDotenvFileRecent:
 
