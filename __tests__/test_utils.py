@@ -24,7 +24,6 @@ def before_all(monkeypatch: pytest.MonkeyPatch, define_env_path):
 def valid_env_vars(request: pytest.FixtureRequest):
     request.cls.pytest_fixture_valid_env_vars = [
         "CLIENT_ID",
-        "CLIENT_SECRET",
         "CLIENT_STATE",
         "REFRESH_TOKEN",
     ]
@@ -88,7 +87,7 @@ class TestHandleAuthorisation:
                     "refresh_token": "0354489231f6a874331aer4927569297c7fea4d5",
                 }
 
-        monkeypatch.setattr("requests.post", lambda _, data: MockResponse())
+        monkeypatch.setattr("requests.get", lambda _: MockResponse())
 
     @pytest.fixture(name="401 mock API request / response")
     def mock_401_api_request_and_response(
@@ -102,7 +101,7 @@ class TestHandleAuthorisation:
             def text(self):
                 return "The credentials you provided are invalid."
 
-        monkeypatch.setattr("requests.post", lambda _, data: MockResponse())
+        monkeypatch.setattr("requests.get", lambda _: MockResponse())
 
     @pytest.fixture(name="404 mock API request / response")
     def mock_404_api_request_and_response(
@@ -116,7 +115,7 @@ class TestHandleAuthorisation:
             def text(self):
                 return "The information that the request is trying to access does not exist."
 
-        monkeypatch.setattr("requests.post", lambda _, data: MockResponse())
+        monkeypatch.setattr("requests.get", lambda _: MockResponse())
 
     @pytest.fixture(name="429 mock API request / response")
     def mock_429_api_request_and_response(
@@ -132,7 +131,7 @@ class TestHandleAuthorisation:
                     "The request was throttled because of exceeding request limit rates"
                 )
 
-        monkeypatch.setattr("requests.post", lambda _, data: MockResponse())
+        monkeypatch.setattr("requests.get", lambda _: MockResponse())
 
     @pytest.fixture(name="Unknown bad mock API request / response")
     def mock_4xx_5xx_api_request_and_response(
@@ -146,7 +145,7 @@ class TestHandleAuthorisation:
             def text(self):
                 return "An unknown bad thing happened..."
 
-        monkeypatch.setattr("requests.post", lambda _, data: MockResponse())
+        monkeypatch.setattr("requests.get", lambda _: MockResponse())
 
     class TestProperties:
         @property
@@ -271,9 +270,9 @@ class TestHandleAuthorisation:
         def before_each(self, remove_env_file):
             remove_env_file(self.env_path)
 
-        def test_creates_a_env_file(self):
+        def test_creates_an_env_file(self):
             ha = HandleAuthorisation("client id")
-            ha._oauth_code = "mock code"
+            ha.oauth_code = "mockcodemockcodemockcodemockcode"
 
             ha.set_dotenv_file("token")
 
@@ -281,7 +280,7 @@ class TestHandleAuthorisation:
 
         def test_env_file_contains_correct_variables(self):
             ha = HandleAuthorisation("client id")
-            ha._oauth_code = "mock code"
+            ha.oauth_code = "mockcodemockcodemockcodemockcode"
 
             ha.set_dotenv_file("token")
 
@@ -295,28 +294,28 @@ class TestHandleAuthorisation:
 
         def test_env_file_values_are_user_defined(self):
             ha = HandleAuthorisation("client_bob")
-            ha._oauth_code = "mock code"
+            ha.oauth_code = "mockcodemockcodemockcodemockcode"
 
             ha.set_dotenv_file("bobs_api_token")
 
             env_dict = dotenv.dotenv_values(self.env_path)
 
             assert env_dict[self.valid_env_vars[0]] == "client_bob"
-            assert env_dict[self.valid_env_vars[3]] == "bobs_api_token"
+            assert env_dict[self.valid_env_vars[2]] == "bobs_api_token"
 
         def test_returns_true_if_env_file_up_to_date(self):
             ha = HandleAuthorisation("client id")
-            ha._oauth_code = "mock code"
+            ha.oauth_code = "mockcodemockcodemockcodemockcode"
 
             assert ha.set_dotenv_file("token") == True
 
         def test_client_state_is_randomly_generated_in_env_file(self):
             ha = HandleAuthorisation("client id")
-            ha._oauth_code = "mock code"
+            ha.oauth_code = "mockcodemockcodemockcodemockcode"
             ha.set_dotenv_file("token")
 
             env_dict = dotenv.dotenv_values(self.env_path)
-            state = env_dict[self.valid_env_vars[2]]
+            state = env_dict[self.valid_env_vars[1]]
             regex_result = re.fullmatch("^[A-Z0-9]{8,12}$", state, flags=re.I)
 
             assert isinstance(regex_result, re.Match) == True
@@ -344,7 +343,7 @@ class TestHandleAuthorisation:
             self,
         ):
             ha = HandleAuthorisation("client id")
-            ha._oauth_code = "mock code"
+            ha.oauth_code = "mockcodemockcodemockcodemockcode"
 
             env_dict = dotenv.dotenv_values(self.env_path)
             env_values = env_dict.values()
@@ -358,7 +357,7 @@ class TestHandleAuthorisation:
         @pytest.mark.usefixtures("Change env file modified date to 1 day ago")
         def test_if_file_is_old_updates_id_and_oauth_with_value_from_env_file(self):
             ha = HandleAuthorisation("client id")
-            ha._oauth_code = "mock code"
+            ha.oauth_code = "mockcodemockcodemockcodemockcode"
 
             env_dict = dotenv.dotenv_values(self.env_path)
             env_values = env_dict.values()
@@ -370,14 +369,14 @@ class TestHandleAuthorisation:
 
         def test_returns_string_recent_on_success(self):
             ha = HandleAuthorisation("client id")
-            ha._oauth_code = "mock code"
+            ha.oauth_code = "mockcodemockcodemockcodemockcode"
 
             assert ha.load_dotenv_file() == "recent"
 
         @pytest.mark.usefixtures("Change env file modified date to 1 day ago")
         def test_returns_string_old_if_env_file_is_not_recent(self):
             ha = HandleAuthorisation("client id")
-            ha._oauth_code = "mock code"
+            ha.oauth_code = "mockcodemockcodemockcodemockcode"
 
             assert ha.load_dotenv_file() == "old"
 
@@ -433,7 +432,7 @@ class TestHandleAuthorisation:
         @pytest.mark.usefixtures("200 mock API request / response")
         def test_updates_oauth_token_property_with_access_token(self):
             ha = HandleAuthorisation("client id")
-            ha._oauth_code = "mock code"
+            ha.oauth_code = "mockcodemockcodemockcodemockcode"
 
             ha.request_oauth_token()
 
@@ -442,21 +441,21 @@ class TestHandleAuthorisation:
         @pytest.mark.usefixtures("200 mock API request / response")
         def test_updates_env_file_with_refresh_token(self):
             ha = HandleAuthorisation("client id")
-            ha._oauth_code = "mock code"
+            ha.oauth_code = "mockcodemockcodemockcodemockcode"
 
             ha.request_oauth_token()
 
             env_dict = dotenv.dotenv_values(self.env_path)
 
             assert (
-                env_dict[self.valid_env_vars[3]]
+                env_dict[self.valid_env_vars[2]]
                 == "0354489231f6a874331aer4927569297c7fea4d5"
             )
 
         @pytest.mark.usefixtures("200 mock API request / response")
         def test_returns_an_access_token(self):
             ha = HandleAuthorisation("client id")
-            ha._oauth_code = "mock code"
+            ha.oauth_code = "mockcodemockcodemockcodemockcode"
 
             assert (
                 ha.request_oauth_token() == "64c64660ceed813476b314f52136d9698e075622"
@@ -465,7 +464,7 @@ class TestHandleAuthorisation:
         @pytest.mark.usefixtures("401 mock API request / response")
         def test_401_status_raises_connection_refused_error(self):
             ha = HandleAuthorisation("client id")
-            ha._oauth_code = "mock code"
+            ha.oauth_code = "mockcodemockcodemockcodemockcode"
 
             with pytest.raises(ConnectionRefusedError):
                 ha.request_oauth_token()
@@ -473,7 +472,7 @@ class TestHandleAuthorisation:
         @pytest.mark.usefixtures("404 mock API request / response")
         def test_404_status_raises_connection_error(self):
             ha = HandleAuthorisation("client id")
-            ha._oauth_code = "mock code"
+            ha.oauth_code = "mockcodemockcodemockcodemockcode"
 
             with pytest.raises(ConnectionError):
                 ha.request_oauth_token()
@@ -481,7 +480,7 @@ class TestHandleAuthorisation:
         @pytest.mark.usefixtures("429 mock API request / response")
         def test_429_status_raises_connection_refused_error(self):
             ha = HandleAuthorisation("client id")
-            ha._oauth_code = "mock code"
+            ha.oauth_code = "mockcodemockcodemockcodemockcode"
 
             with pytest.raises(ConnectionRefusedError):
                 ha.request_oauth_token()
@@ -489,7 +488,7 @@ class TestHandleAuthorisation:
         @pytest.mark.usefixtures("Unknown bad mock API request / response")
         def test_4xx_5xx_status_raises_connection_refused_error(self):
             ha = HandleAuthorisation("client id")
-            ha._oauth_code = "mock code"
+            ha.oauth_code = "mockcodemockcodemockcodemockcode"
 
             with pytest.raises(ConnectionError):
                 ha.request_oauth_token()
