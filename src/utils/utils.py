@@ -44,7 +44,6 @@ class HandleAuthorisation:
             self.load_dotenv_file()
 
         self._state: str | None = None
-        self.__client_secret: str | None = None
         self.oauth_code = None
         self.oauth_token: str | None = None
 
@@ -108,7 +107,6 @@ class HandleAuthorisation:
         with open(self.__env_path, "w") as file:
             file.write(
                 f"CLIENT_ID={self.client_id}\n"
-                + f"CLIENT_SECRET={self.__client_secret}\n"
                 + f"CLIENT_STATE={state}\n"
                 + f"REFRESH_TOKEN={client_token}"
             )
@@ -120,7 +118,6 @@ class HandleAuthorisation:
         env_dict: dict[str, str | None] = dotenv.dotenv_values(self.__env_path)
 
         self.client_id = str(env_dict["CLIENT_ID"])
-        self.__client_secret = env_dict["CLIENT_SECRET"]
         self._state = env_dict["CLIENT_STATE"]
         self.oauth_token = env_dict["REFRESH_TOKEN"]
 
@@ -146,22 +143,16 @@ class HandleAuthorisation:
         webbrowser.open(url)
 
     def request_oauth_token(self) -> str | None:
-        post_data = {
-            "client_id": self.client_id,
-            "client_secret": self.__client_secret,
-        }
-
-        if self.oauth_code == None:
-            post_data["grant_type"] = "refresh_token"
-            post_data["refresh_token"] = str(self.oauth_token)
-        else:
-            post_data["grant_type"] = "authorization_code"
-            post_data["code"] = self.oauth_code
-
-        token_response = requests.post(
-            "https://freesound.org/apiv2/oauth2/access_token/",
-            data=post_data,
+        url = (
+            "https://devdolphin7.netlify.app/.netlify/functions/move-alarm?"
+            + f"client_id={self.client_id}"
         )
+        if self.oauth_code != None:
+            url += f"&code={self.oauth_code}"
+        else:
+            url += f"&token={self.oauth_token}"
+
+        token_response = requests.get(url)
 
         match token_response.status_code:
             case 200:
