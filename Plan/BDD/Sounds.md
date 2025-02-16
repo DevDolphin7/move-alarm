@@ -32,8 +32,8 @@ Then play a user defined sound from [Freesound](https://freesound.org)
 
 Given a user _has_ logged in to [Freesound](https://freesound.org)  
 And has defined the type of sound they want to hear  
-But there are no matching search results
-Then warn the user that their search terms yielded no results
+But there are no matching search results  
+Then warn the user that their search terms yielded no results  
 Then play a sound
 
 ### Functions
@@ -95,7 +95,7 @@ Then the sound should stop playing immediately
 
 > Scenario: Stop playing multiple sounds
 
-Given multiple sounds are currently playing
+Given multiple sounds are currently playing  
 And the user provided a stop command during the playback  
 Then all sounds should stop playing immediately
 

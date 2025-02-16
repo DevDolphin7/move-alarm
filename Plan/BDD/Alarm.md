@@ -33,18 +33,18 @@ Then a sound should play after the wait duration
 
 > Scenario: Snooze an upcoming alarm
 
-Given an alarm has been set
-But the user wants to delay the alarm sounding
-And the snooze duration is defined
+Given an alarm has been set  
+But the user wants to delay the alarm sounding  
+And the snooze duration is defined  
 Then the sound should play after the wait duration and snooze duration
 
 > Scenario: Snooze a playing alarm
 
-Given an alarm has gone off
-And is currently playing a sound
-But the user wants to snooze the alarm
-And the snooze duration is defined
-Then the sound should stop playing
+Given an alarm has gone off  
+And is currently playing a sound  
+But the user wants to snooze the alarm  
+And the snooze duration is defined  
+Then the sound should stop playing  
 Then the sound should play after the snooze duration
 
 ### Functions
@@ -81,7 +81,7 @@ Then the sound should play after the snooze duration
 
 Given the user has logged into their computer  
 And the script has automatically started running  
-But the user doesn't want the alarm to sound
+But the user doesn't want the alarm to sound  
 Then the alarm is removed and will not sound
 
 ### Functions

@@ -32,8 +32,8 @@ And remembered the next time they log on
 
 > Scenario: A user accidently deletes or corrupts their config file
 
-Given a user a irreparably damaged their config file
-Then default values should be used
+Given a user a irreparably damaged their config file  
+Then default values should be used  
 Then the config file should be remade
 
 ### Functions
