@@ -21,13 +21,14 @@ Then a sound should play after the wait duration
 -   updates property to reflect alarm is set
 -   waits for wait duration without halting the program
 -   after wait duration, plays a sound
--   return datetime: actual time alarm will sound
+-   return datetime: actual time alarm will sound on success
+-   return none on failure
 
 ### Properties
 
 -   wait_duration: datetime
 -   alarm_set: bool
--   alarm_time: datetime
+-   alarm_time: datetime | None
 
 ## Snooze Alarm
 
@@ -122,11 +123,11 @@ Then the alarm is removed and will not sound
 
 ## Collected Properties
 
-| name             | type         | from self | from Config | from Sounds | visible? |
-| ---------------- | ------------ | --------- | ----------- | ----------- | -------- |
-| wait_duration    | `<datetime>` |           | yes         |             | -        |
-| sound_path       | str          |           |             | yes         | -        |
-| is_alarm_set     | bool         | yes       |             |             | yes      |
-| alarm_time       | `<datetime>` | yes       |             |             | yes      |
-| is_sound_playing | bool         |           |             | yes         | -        |
-| snooze_duration  | `<datetime>` |           | yes         |             | -        |
+| name             | type               | from self | from Config | from Sounds | visible? |
+| ---------------- | ------------------ | --------- | ----------- | ----------- | -------- |
+| wait_duration    | `<datetime>`       |           | yes         |             | -        |
+| sound_path       | str                |           |             | yes         | -        |
+| is_alarm_set     | bool               | yes       |             |             | yes      |
+| alarm_time       | `<datetime>`, None | yes       |             |             | yes      |
+| is_sound_playing | bool               |           |             | yes         | -        |
+| snooze_duration  | `<datetime>`       |           | yes         |             | -        |
