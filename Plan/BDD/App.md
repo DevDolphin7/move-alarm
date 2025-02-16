@@ -1,6 +1,42 @@
 # App
 
-## Test Sounds
+## Help
+
+> Scenario:
+
+Given
+
+### Functions
+
+### Tests
+
+### Properties
+
+## Start
+
+> Scenario:
+
+Given
+
+### Functions
+
+### Tests
+
+### Properties
+
+## Stop
+
+> Scenario:
+
+Given
+
+### Functions
+
+### Tests
+
+### Properties
+
+## Test
 
 > Scenario: The user wants to test the sound is playing properly
 
@@ -15,4 +51,14 @@ Then a sound should play immediately
 
 ### Properties
 
-# References:
+## Configure (Config)
+
+> Scenario:
+
+Given
+
+### Functions
+
+### Tests
+
+### Properties
