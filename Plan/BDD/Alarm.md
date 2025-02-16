@@ -1,45 +1,112 @@
-# BDD: Gherkin Language
-
--   Given
--   When
--   Then
--   And
--   But
--   Feature
--   Rule
--   Example
--   Background
--   Scenario
-
 # Alarm
 
-> Scenario: Play a sound
+## Set Alarm
 
-Given a user **has not** logged in to [Freesound](https://freesound.org)  
-And wants a sound to remind them to move  
-Then play a sound
+> Scenario: Set an alarm after computer turns on
 
-> Scenario: Play user defined sounds
+Given the user has logged into their computer  
+And the script has automatically started running  
+And the desired wait duration is defined  
+Then a sound should play after the wait duration
 
-Given a user **has not** logged in to [Freesound](https://freesound.org)  
-And wants a sound to remind them to move  
-Feature the user can add thier own sound files  
-Then play one of the files given by the user
+### Functions
 
-> Scenario: Play a sound from [Freesound](https://freesound.org)
+-   set_alarm
 
-Given a user _has_ logged in to [Freesound](https://freesound.org)  
-And wants a sound to remind them to move  
-Then play a sound from [Freesound](https://freesound.org)
+### Tests
 
-> Scenario: Play a user defined sound from [Freesound](https://freesound.org)
+#### set_alarm
 
-Given a user _has_ logged in to [Freesound](https://freesound.org)  
-And wants a sound to remind them to move  
-Feature the user can define the type of sounds they want to hear  
-Then play a user defined sound from [Freesound](https://freesound.org)
+-   required parameter datetime: wait duration
+-   updates property to reflect alarm is set
+-   waits for wait duration without halting the program
+-   after wait duration, plays a sound
+-   return datetime: actual time alarm will sound
 
-# References:
+### Properties
 
--   [https://katalon.com/resources-center/blog/bdd-testing](https://katalon.com/resources-center/blog/bdd-testing)
--   [Freesound](https://freesound.org)
+-   wait_duration: datetime
+-   sound_path: str
+-   alarm_set: bool
+-   alarm_time: datetime
+
+## Snooze Alarm
+
+> Scenario: Snooze an upcoming alarm
+
+Given an alarm has been set
+But the user wants to delay the alarm sounding
+And the snooze duration is defined
+Then the sound should play after the wait duration and snooze duration
+
+> Scenario: Snooze a playing alarm
+
+Given an alarm has gone off
+And is currently playing a sound
+But the user wants to snooze the alarm
+And the snooze duration is defined
+Then the sound should stop playing
+Then the sound should play after the snooze duration
+
+### Functions
+
+-   is_sound_currently_playing
+-   snooze_alarm
+
+### Tests
+
+#### is_sound_currently_playing
+
+-   return bool
+-   returns false if sound is not currently playing
+-   returns true if sound is currently playing
+
+#### snooze_alarm
+
+-   required parameter datetime: snooze duration
+-   if sound **is not** currently playing, sound will not play until after wait duration and snooze duration
+-   if sound _is_ currently playing, sound stops playing
+-   if sound _is_ currently playing, sound starts playing immediatly after snooze duration
+-   return datetime: actual time alarm will sound
+
+### Properties
+
+-   sound_playing: bool
+-   snooze_duration: datetime
+-   wait_duration
+-   alarm_time
+
+## Remove_alarm
+
+> Scenario: The user wants to turn off the sedentry alarm
+
+Given the user has logged into their computer  
+And the script has automatically started running  
+But the user doesn't want the alarm to sound
+Then the alarm is removed and will not sound
+
+### Functions
+
+-   is_alarm_set
+-   remove_alarm
+
+### Tests
+
+#### is_alarm_set
+
+-   return bool
+-   returns true if the alarm _is_ waiting to play
+-   returns true if the alarm was snoozed and _is_ still waiting to play
+-   returns false if the alarm **is not** waiting to play
+-   returns false if the alarm is currently playing and no further alarm is set
+
+#### remove_alarm
+
+-   if an alarm is set, removes it
+-   if alarm was removed, updates alarm set property
+-   return bool: false if no alarm is set
+-   return bool: true on success
+
+### Properties
+
+-   alarm_set
