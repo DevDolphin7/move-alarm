@@ -20,24 +20,24 @@ For exmaple, on Debian:
 
 Package dependencies and environments are managed by [poetry](https://python-poetry.org/docs/#installation).
 
-> git clone https://github.com/DevDolphin7/move-alarm.git
+> `git clone https://github.com/DevDolphin7/move-alarm.git`
 
-> cd move-alarm
+> `cd move-alarm`
 
 ### Installing Dependencies
 
-> poetry install
+> `poetry install`
 
 ### Testing
 
-> poetry run pytest **tests**/
+> `poetry run pytest __tests__/`
 
 ### Running The App
 
 For Linux / MacOS / WSL:
 
-> poetry run python3 ./src/app.py
+> `poetry run python3 ./src/app.py`
 
 For Windows:
 
-> poetry run python3 .\src\app.py
+> `poetry run py .\src\app.py`
