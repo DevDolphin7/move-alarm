@@ -41,7 +41,7 @@ Then play a sound
 -   get_local_file
 -   get_freesound_file
 -   search_freesound
--   play
+-   play_sound
 
 ### Tests
 
@@ -70,7 +70,7 @@ Then play a sound
 -   returns a random sound result on success
 -   returns None on failure
 
-#### play
+#### play_sound
 
 -   required parameter str: wav path
 -   sets currently_playing to true
@@ -101,11 +101,11 @@ Then all sounds should stop playing immediately
 
 ### Functions
 
--   stop
+-   stop_sound
 
 ### Tests
 
-#### stop
+#### stop_sound
 
 -   return bool: false if no sound is playing
 -   if one sound is playing, it immediately stops
@@ -124,8 +124,8 @@ Then all sounds should stop playing immediately
 -   get_local_file
 -   get_freesound_file
 -   search_freesound
--   play
--   stop
+-   play_sound
+-   stop_sound
 
 ## Collected Properties
 
