@@ -26,7 +26,6 @@ Then a sound should play after the wait duration
 ### Properties
 
 -   wait_duration: datetime
--   sound_path: str
 -   alarm_set: bool
 -   alarm_time: datetime
 
@@ -110,3 +109,24 @@ Then the alarm is removed and will not sound
 ### Properties
 
 -   alarm_set
+
+# Summary
+
+## Collected Functions
+
+-   set_alarm
+-   is_sound_currently_playing -> could be a class property
+-   snooze_alarm
+-   is_alarm_set -> could be a class property
+-   remove_alarm
+
+## Collected Properties
+
+| name             | type         | from self | from Config | from Sounds | visible? |
+| ---------------- | ------------ | --------- | ----------- | ----------- | -------- |
+| wait_duration    | `<datetime>` |           | yes         |             | -        |
+| sound_path       | str          |           |             | yes         | -        |
+| is_alarm_set     | bool         | yes       |             |             | yes      |
+| alarm_time       | `<datetime>` | yes       |             |             | yes      |
+| is_sound_playing | bool         |           |             | yes         | -        |
+| snooze_duration  | `<datetime>` |           | yes         |             | -        |
