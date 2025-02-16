@@ -34,7 +34,7 @@ And remembered the next time they log on
 
 Given a user a irreparably damaged their config file  
 Then default values should be used  
-Then the config file should be remade
+Then the config file should be re-made
 
 ### Functions
 
@@ -70,6 +70,7 @@ Then the config file should be remade
 -   sets snooze_duration to 5 minutes
 -   sets wav_directory to an example directory
 -   sets sound_theme to piano or guitar
+-   invokes set_config_file
 
 ### Properties
 
