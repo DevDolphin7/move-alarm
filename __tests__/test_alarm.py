@@ -1,4 +1,4 @@
-from src.components.alarm import Alarm
+from move_alarm.components.alarm import Alarm
 
 
 class TestAlarm:

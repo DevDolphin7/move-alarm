@@ -1,4 +1,4 @@
-from src.utils.oauth import HandleAuthorisation
+from move_alarm.utils.oauth import HandleAuthorisation
 
 
 def get_token():

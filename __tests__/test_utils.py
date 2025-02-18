@@ -2,7 +2,7 @@ import os, re, io
 from datetime import datetime
 from collections.abc import Callable
 import pytest, pytest_mock, dotenv
-from src.utils.oauth import HandleAuthorisation
+from move_alarm.utils.oauth import HandleAuthorisation
 
 
 @pytest.fixture(scope="class")
