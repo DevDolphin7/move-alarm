@@ -7,7 +7,7 @@ from move_alarm.utils.oauth import HandleAuthorisation
 
 @pytest.fixture(scope="class")
 def define_env_path():
-    return os.path.join(os.path.dirname(__file__)[:-9], "src", ".env.test")
+    return os.path.join(os.path.dirname(__file__)[:-9], "move_alarm", ".env.test")
 
 
 @pytest.fixture(scope="class", autouse=True)
@@ -519,7 +519,7 @@ class TestHandleAuthorisation:
             ha = HandleAuthorisation("client id")
 
             mock_get_user_permission = mocker.patch(
-                "src.utils.utils.HandleAuthorisation.get_user_permission"
+                "move_alarm.utils.oauth.HandleAuthorisation.get_user_permission"
             )
 
             ha.get_token()
@@ -552,7 +552,7 @@ class TestHandleAuthorisation:
             ha = HandleAuthorisation()
 
             mock_load_dotenv_file = mocker.patch(
-                "src.utils.utils.HandleAuthorisation.load_dotenv_file"
+                "move_alarm.utils.oauth.HandleAuthorisation.load_dotenv_file"
             )
 
             ha.get_token()
@@ -568,7 +568,7 @@ class TestHandleAuthorisation:
             ha = HandleAuthorisation()
 
             mock_request_oauth_token = mocker.patch(
-                "src.utils.utils.HandleAuthorisation.request_oauth_token"
+                "move_alarm.utils.oauth.HandleAuthorisation.request_oauth_token"
             )
 
             ha.get_token()
