@@ -38,52 +38,52 @@ Then play a sound
 
 ### Functions
 
--   get_local_file
--   get_freesound_file
--   search_freesound
--   play_sound
+- get_local_file
+- get_freesound_file
+- search_freesound
+- play_sound
 
 ### Tests
 
 #### get_local_file
 
--   required parameter str: directory path
--   searches given directory for wav files
--   randomly selects a file from the directory
--   return str: wav file path
+- required parameter str: directory path
+- searches given directory for wav files
+- randomly selects a file from the directory
+- return str: wav file path
 
 #### get_freesound_file
 
--   required parameter str: directory path
--   keyword parameter list[str]: sound theme
--   invokes search_freesound with the sound theme
--   if there _is_ a valid result, downloads a wav sound to the directory path
--   if there _is_ a valid result, sets the wav path to the downloaded file
--   if there **is not** a valid result, warns the user
--   if there **is not** a valid result, sets the wav path to get_local_file return value
--   return str: wav file path
+- required parameter str: directory path
+- keyword parameter list[str]: sound theme
+- invokes search_freesound with the sound theme
+- if there _is_ a valid result, downloads a wav sound to the directory path
+- if there _is_ a valid result, sets the wav path to the downloaded file
+- if there **is not** a valid result, warns the user
+- if there **is not** a valid result, sets the wav path to get_local_file return value
+- return str: wav file path
 
 #### search_freesound
 
--   required parameter list[str]: sound theme
--   searches for sound results from [Freesound](https://freesound.org)
--   returns a random sound result on success
--   returns None on failure
+- required parameter list[str]: sound theme
+- searches for sound results from [Freesound](https://freesound.org)
+- returns a random sound result on success
+- returns None on failure
 
 #### play_sound
 
--   required parameter str: wav path
--   sets currently_playing to true
--   plays the sound
--   when the sound stops, sets currently_playing to false
+- required parameter str: wav path
+- sets currently_playing to true
+- plays the sound
+- when the sound stops, sets currently_playing to false
 
 ### Properties
 
--   wav_directory: str
--   wav_path: str
--   sound_theme: list[str]
--   selected_sound: `<sound result>`
--   currently_playing: bool
+- wav_directory: str
+- wav_path: str
+- sound_theme: list[str]
+- selected_sound: `<sound result>`
+- currently_playing: bool
 
 ## Stop Playing a Sound
 
@@ -101,43 +101,43 @@ Then all sounds should stop playing immediately
 
 ### Functions
 
--   stop_sound
+- stop_sound
 
 ### Tests
 
 #### stop_sound
 
--   return bool: false if no sound is playing
--   if one sound is playing, it immediately stops
--   if multiple sounds are playing, they all immediately stop
--   sets currently_playing to false
--   return bool: true if a sound was made to stop playing
+- return bool: false if no sound is playing
+- if one sound is playing, it immediately stops
+- if multiple sounds are playing, they all immediately stop
+- sets currently_playing to false
+- return bool: true if a sound was made to stop playing
 
 ### Properties
 
--   currently_playing
+- currently_playing
 
 # Summary
 
 ## Collected Functions
 
--   get_local_file
--   get_freesound_file
--   search_freesound
--   play_sound
--   stop_sound
+- get_local_file
+- get_freesound_file
+- search_freesound
+- play_sound
+- stop_sound
 
 ## Collected Properties
 
-| name            | type             | from self | from Config | visible? |
-| --------------- | ---------------- | --------- | ----------- | -------- |
-| wav_directory   | str              |           | yes         | -        |
-| wav_path        | str              | yes       |             |          |
-| sound_theme     | list[str]        |           | yes         | -        |
-| selected_sound  | `<sound result>` | yes       |             | yes      |
-| current_playing | bool             | yes       |             | yes      |
+| name           | type             | from self | from Config | visible? |
+| -------------- | ---------------- | --------- | ----------- | -------- |
+| wav_directory  | str              |           | yes         | -        |
+| wav_path       | str              | yes       |             |          |
+| sound_theme    | list[str]        |           | yes         | -        |
+| selected_sound | `<sound result>` | yes       |             | yes      |
+| is_playing     | bool             | yes       |             | yes      |
 
 # References
 
--   [Freesound](https://freesound.org)
--   [Freesound `<Sound Result>`](https://freesound.org/docs/api/resources_apiv2.html#response-sound-list)
+- [Freesound](https://freesound.org)
+- [Freesound `<Sound Result>`](https://freesound.org/docs/api/resources_apiv2.html#response-sound-list)
