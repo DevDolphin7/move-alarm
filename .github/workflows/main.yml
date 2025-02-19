@@ -1,4 +1,4 @@
-name: Run pytest
+name: Run linting and pytest
 
 on:
   pull_request:
@@ -37,6 +37,6 @@ jobs:
           pipx ensurepath
           poetry install --with test
       - name: Run Linting
-        run: poetry run mypy src/
+        run: poetry run mypy move_alarm/
       - name: Run tests
         run: poetry run pytest -v -s __tests__/
