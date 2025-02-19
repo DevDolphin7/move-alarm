@@ -28,7 +28,7 @@ jobs:
           else echo "Skips were found in pytest, please remove them before merging to main" & exit 1;
           fi
       - name: Install Prerequisites
-        run: apt-get install -y python3-dev libasound2-dev
+        run: sudo apt-get install -y python3-dev libasound2-dev
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
