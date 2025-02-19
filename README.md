@@ -117,6 +117,8 @@ From here, you can enter various commands to control the application.
 
 - **start** - Begin the reminder cycle.
 
+- **snooze** - Delay the current reminder cycle by the snooze duration.
+
 - **stop** - Halt the reminders.
 
 - **test** - Test the sound notifications.
@@ -154,6 +156,14 @@ From here, you can enter various commands to control the application.
     ```
     MoveAlarm> set path path/to/your/wav_files/
     ```
+
+  - **set freesound** - Define whether to get sounds from [Freesound](https://freesound.org) or just use local files.
+
+    ```
+    MoveAlarm> set freesound false
+    ```
+
+    💡 This will only look at the local directory where you want sounds to be selected from.
 
   - **set theme** - Define the themes of the sounds you want to hear from [Freesound](https://freesound.org).
 
@@ -196,3 +206,4 @@ This project is licensed under the [MIT License](https://opensource.org/licenses
 - Check if the alarm is currently set or not
 - Script to automate add to startup process (cross-platform)
 - Check information on recently played sounds (number of sounds could be user defined)
+- Option to have max number of files in directory (after downloading one, it removes one)
