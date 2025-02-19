@@ -1,5 +1,5 @@
 [project]
-name = "src"
+name = "move-alarm"
 version = "0.1.0"
 description = "An alarm designed to remind you to be more active!"
 authors = [
@@ -12,12 +12,16 @@ dependencies = [
     "python-dotenv (>=1.0.1,<2.0.0)",
     "requests (>=2.32.3,<3.0.0)",
     "types-requests (>=2.32.0.20241016,<3.0.0.0)",
+    "simpleaudio (>=1.0.4,<2.0.0)",
 ]
 
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+move-alarm = "move_alarm.app:main"
 
 [tool.poetry.group.test.dependencies]
 pytest = "^8.3.4"
