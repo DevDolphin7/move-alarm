@@ -39,7 +39,7 @@ Then play a sound
 ### Functions
 
 - get_local_file
-- get_freesound_file
+- download_from_freesound
 - search_freesound
 - play_sound
 
@@ -52,7 +52,7 @@ Then play a sound
 - randomly selects a file from the directory
 - return str: wav file path
 
-#### get_freesound_file
+#### download_from_freesound
 
 - required parameter str: directory path
 - keyword parameter list[str]: sound theme
@@ -122,7 +122,7 @@ Then all sounds should stop playing immediately
 ## Collected Functions
 
 - get_local_file
-- get_freesound_file
+- download_from_freesound
 - search_freesound
 - play_sound
 - stop_sound
