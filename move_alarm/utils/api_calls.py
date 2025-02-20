@@ -14,7 +14,7 @@ def get_api_token(url: str) -> requests.Response:
     return requests.get(url)
 
 
-def search_api(token: str, themes: list[str] = []) -> SoundResultDict:
+def search_for_sounds(token: str, themes: list[str] = []) -> list[SoundResultDict]:
     url: str = (
         "https://freesound.org/apiv2/search/text/?"
         + "filter=(duration:[30%20TO%20210]%20AND%20type:wav)"
@@ -29,11 +29,8 @@ def search_api(token: str, themes: list[str] = []) -> SoundResultDict:
 
     response = requests.get(url, headers={"Authorization": f"Bearer {token}"})
 
-    match response.status_code:
-        case 200:
-            result: SoundListResponse = response.json()
-            results = result["results"]
+    if response.status_code == 200:
+        result: SoundListResponse = response.json()
+        return result["results"]
 
-            index = random.randint(0, len(results) - 1)
-
-            return results[index]
+    raise ConnectionError(response.text)
