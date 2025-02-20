@@ -2,8 +2,9 @@ from os import path
 from datetime import datetime
 from random import randint
 from time import sleep
-import threading, webbrowser, re
-import dotenv, requests
+import threading, re
+import dotenv
+from move_alarm.utils.api_calls import open_browser_to_api_auth, get_api_token
 
 
 class HandleAuthorisation:
@@ -127,8 +128,9 @@ class HandleAuthorisation:
         return output
 
     def get_user_permission(self) -> bool:
-        url = f"https://freesound.org/apiv2/oauth2/authorize/?client_id={self.client_id}&response_type=code&state={self._state}"
-        browser_thread = threading.Thread(target=lambda: self.open_browser(url))
+        browser_thread = threading.Thread(
+            target=lambda: open_browser_to_api_auth(self.client_id, self._state)
+        )
         browser_thread.start()
 
         browser_thread.join(timeout=15.0)
@@ -142,9 +144,6 @@ class HandleAuthorisation:
 
         return True
 
-    def open_browser(self, url: str) -> None:
-        webbrowser.open(url)
-
     def request_oauth_token(self) -> str | None:
         url = (
             "https://devdolphin7.netlify.app/.netlify/functions/move-alarm?"
@@ -155,7 +154,7 @@ class HandleAuthorisation:
         else:
             url += f"&token={self.oauth_token}"
 
-        token_response = requests.get(url)
+        token_response = get_api_token(url)
 
         match token_response.status_code:
             case 200:
