@@ -1,8 +1,8 @@
 import webbrowser, requests, random
-from move_alarm.types.sounds import SoundListResponse
+from move_alarm.types.sounds import SoundListResponse, SoundResultDict
 
 
-def open_browser_to_api_auth(client_id: str, state: str = "") -> None:
+def open_browser_to_api_auth(client_id: str, state: str | None = "") -> None:
     url = (
         "https://freesound.org/apiv2/oauth2/authorize/?"
         + f"client_id={client_id}&response_type=code&state={state}"
@@ -14,7 +14,7 @@ def get_api_token(url: str) -> requests.Response:
     return requests.get(url)
 
 
-def search_api(token: str, themes: list[str] = []) -> requests.Response:
+def search_api(token: str, themes: list[str] = []) -> SoundResultDict:
     url: str = (
         "https://freesound.org/apiv2/search/text/?"
         + "filter=(duration:[30%20TO%20210]%20AND%20type:wav)"
