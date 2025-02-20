@@ -1,5 +1,27 @@
 # Sounds
 
+## `__init__`
+
+> Scenario: The user wants to get sounds from [Freesound](https://freesound.org)
+
+Given the user has the [Freesound](https://freesound.org) api enabled  
+And they have previously logged into [Freesound](https://freesound.org)  
+And the alarm is about to sound  
+Then authorisation is handled without the users knowledge  
+And a sound is downloaded
+
+### Functions
+
+None
+
+### Tests
+
+- Initialises with handle_auth property
+
+### Properties
+
+- handle_auth: `HandleAuthentification`
+
 ## Play a Sound
 
 > Scenario: Play a sound
@@ -129,13 +151,14 @@ Then all sounds should stop playing immediately
 
 ## Collected Properties
 
-| name           | type             | from self | from Config | visible? |
-| -------------- | ---------------- | --------- | ----------- | -------- |
-| wav_directory  | str              |           | yes         | -        |
-| wav_path       | str              | yes       |             |          |
-| sound_theme    | list[str]        |           | yes         | -        |
-| selected_sound | `<sound result>` | yes       |             | yes      |
-| is_playing     | bool             | yes       |             | yes      |
+| name           | type                     | from self | from Config | visible? |
+| -------------- | ------------------------ | --------- | ----------- | -------- |
+| handle_auth    | `HandleAuthentification` | yes       |             |          |
+| wav_directory  | str                      |           | yes         | -        |
+| wav_path       | str                      | yes       |             |          |
+| sound_theme    | list[str]                |           | yes         | -        |
+| selected_sound | `<sound result>`         | yes       |             | yes      |
+| is_playing     | bool                     | yes       |             | yes      |
 
 # References
 
