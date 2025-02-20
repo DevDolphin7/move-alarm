@@ -43,6 +43,10 @@ class TestSounds:
 
         return _mock_api_search_result
 
+    @pytest.fixture(name="Mock HandleAuthorisation.get_token")
+    def mock_handle_authorisation(self, monkeypatch: pytest.MonkeyPatch):
+        monkeypatch.setattr("move_alarm.contexts.auth.get_token", lambda: "mock token")
+
     @pytest.fixture(name="200 mock api sound search")
     def mock_200_sound_search(
         self, monkeypatch: pytest.MonkeyPatch, mock_api_search_result
@@ -59,6 +63,35 @@ class TestSounds:
                     "next": "https://freesound.org/apiv2/search/text/?&query=&filter=(duration:[30%20TO%20210]%20AND%20type:wav%20AND%20description:(piano%20OR%20guitar))&weights=&page=2&fields=id,url,name,description,download,license",
                     "results": mock_api_search_result(),
                 }
+
+        monkeypatch.setattr("requests.get", lambda _, headers: MockResponse())
+
+    @pytest.fixture(name="200 mock api no results sound search")
+    def mock_200_no_results_sound_search(self, monkeypatch: pytest.MonkeyPatch):
+        class MockResponse:
+            @property
+            def status_code(self):
+                return 200
+
+            def json(self):
+                return {
+                    "count": 0,
+                    "previous": None,
+                    "next": None,
+                    "results": [],
+                }
+
+        monkeypatch.setattr("requests.get", lambda _, headers: MockResponse())
+
+    @pytest.fixture(name="500 mock api unexpected error")
+    def mock_500_uexpected_error(self, monkeypatch: pytest.MonkeyPatch):
+        class MockResponse:
+            @property
+            def status_code(self):
+                return 500
+
+            def text(self):
+                return "An unknown bad thing happened..."
 
         monkeypatch.setattr("requests.get", lambda _, headers: MockResponse())
 
@@ -107,6 +140,7 @@ class TestSounds:
             with pytest.raises(FileNotFoundError):
                 sound.get_local_file(invalid_dir_name)
 
+    @pytest.mark.usefixtures("Mock HandleAuthorisation.get_token")
     class TestSearchFreesound:
 
         @property
@@ -114,7 +148,7 @@ class TestSounds:
             return self.pytest_fixture_config
 
         @pytest.mark.usefixtures("200 mock api sound search")
-        def test_requires_token_argument(self):
+        def test_requires_sound_theme_argument(self):
             sound = Sounds()
 
             with pytest.raises(TypeError):
@@ -124,7 +158,7 @@ class TestSounds:
         def test_returns_a_sound_result(self):
             sound = Sounds()
 
-            result = sound.search_freesound("token")
+            result = sound.search_freesound(self.config.sound_themes)
 
             assert isinstance(result, SoundResult) == True
 
@@ -133,19 +167,32 @@ class TestSounds:
             sound = Sounds()
 
             search_results = []
-            for _ in range(0, 10):
+            for _ in range(0, 5):
                 result = sound.search_freesound(self.config.sound_themes)
                 search_results.append(result.id)
 
             assert len(search_results) > 0
             assert len(set(search_results)) > 1
 
+        @pytest.mark.usefixtures("200 mock api no results sound search")
+        def test_returns_none_on_no_sounds(self):
+            sound = Sounds()
+
+            result = sound.search_freesound(self.config.sound_themes)
+
+            assert result == None
+
+        @pytest.mark.usefixtures("500 mock api unexpected error")
+        def test_raises_error_on_non_200_response(self):
+            sound = Sounds()
+
+            with pytest.raises(ConnectionError):
+                sound.search_freesound(self.config.sound_themes)
+
 
 ###----------------------------------
 # Methods to do:
 
-# get_local_file
-# search_freesound
 # download_from_freesound
 # play_sound
 # stop_sound
