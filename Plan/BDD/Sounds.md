@@ -16,11 +16,11 @@ None
 
 ### Tests
 
-- Initialises with handle_auth property
+None
 
 ### Properties
 
-- handle_auth: `HandleAuthentification`
+- auth - this is handled by a context
 
 ## Play a Sound
 
@@ -153,7 +153,7 @@ Then all sounds should stop playing immediately
 
 | name           | type                     | from self | from Config | visible? |
 | -------------- | ------------------------ | --------- | ----------- | -------- |
-| handle_auth    | `HandleAuthentification` | yes       |             |          |
+| auth           | `HandleAuthentification` | context   |             |          |
 | wav_directory  | str                      |           | yes         | -        |
 | wav_path       | str                      | yes       |             |          |
 | sound_theme    | list[str]                |           | yes         | -        |

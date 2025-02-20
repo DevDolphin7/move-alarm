@@ -11,24 +11,24 @@ Then a sound should play after the wait duration
 
 ### Functions
 
--   set_alarm
+- set_alarm
 
 ### Tests
 
 #### set_alarm
 
--   required parameter datetime: wait duration
--   updates property to reflect alarm is set
--   waits for wait duration without halting the program
--   after wait duration, plays a sound
--   return datetime: actual time alarm will sound on success
--   return none on failure
+- required parameter datetime: wait duration
+- updates property to reflect alarm is set
+- waits for wait duration without halting the program
+- after wait duration, plays a sound
+- return datetime: actual time alarm will sound on success
+- return none on failure
 
 ### Properties
 
--   wait_duration: datetime
--   alarm_set: bool
--   alarm_time: datetime | None
+- wait_duration: datetime
+- alarm_set: bool
+- alarm_time: datetime | None
 
 ## Snooze Alarm
 
@@ -50,31 +50,31 @@ Then the sound should play after the snooze duration
 
 ### Functions
 
--   is_sound_currently_playing
--   snooze_alarm
+- is_sound_currently_playing
+- snooze_alarm
 
 ### Tests
 
 #### is_sound_currently_playing
 
--   return bool
--   returns false if sound is not currently playing
--   returns true if sound is currently playing
+- return bool
+- returns false if sound is not currently playing
+- returns true if sound is currently playing
 
 #### snooze_alarm
 
--   required parameter datetime: snooze duration
--   if sound **is not** currently playing, sound will not play until after wait duration and snooze duration
--   if sound _is_ currently playing, sound stops playing
--   if sound _is_ currently playing, sound starts playing immediatly after snooze duration
--   return datetime: actual time alarm will sound
+- required parameter datetime: snooze duration
+- if sound **is not** currently playing, sound will not play until after wait duration and snooze duration
+- if sound _is_ currently playing, sound stops playing
+- if sound _is_ currently playing, sound starts playing immediatly after snooze duration
+- return datetime: actual time alarm will sound
 
 ### Properties
 
--   sound_playing: bool
--   snooze_duration: datetime
--   wait_duration
--   alarm_time
+- sound_playing: bool
+- snooze_duration: datetime
+- wait_duration
+- alarm_time
 
 ## Remove_alarm
 
@@ -87,47 +87,47 @@ Then the alarm is removed and will not sound
 
 ### Functions
 
--   is_alarm_set
--   remove_alarm
+- is_alarm_set
+- remove_alarm
 
 ### Tests
 
 #### is_alarm_set
 
--   return bool
--   returns true if the alarm _is_ waiting to play
--   returns true if the alarm was snoozed and _is_ still waiting to play
--   returns false if the alarm **is not** waiting to play
--   returns false if the alarm is currently playing and no further alarm is set
+- return bool
+- returns true if the alarm _is_ waiting to play
+- returns true if the alarm was snoozed and _is_ still waiting to play
+- returns false if the alarm **is not** waiting to play
+- returns false if the alarm is currently playing and no further alarm is set
 
 #### remove_alarm
 
--   if an alarm is set, removes it
--   if alarm was removed, updates alarm set property
--   return bool: false if no alarm is set
--   return bool: true on success
+- if an alarm is set, removes it
+- if alarm was removed, updates alarm set property
+- return bool: false if no alarm is set
+- return bool: true on success
 
 ### Properties
 
--   alarm_set
+- alarm_set
 
 # Summary
 
 ## Collected Functions
 
--   set_alarm
--   is_sound_currently_playing -> could be a class property
--   snooze_alarm
--   is_alarm_set -> could be a class property
--   remove_alarm
+- set_alarm
+- is_sound_currently_playing -> could be a class property
+- snooze_alarm
+- is_alarm_set -> could be a class property
+- remove_alarm
 
 ## Collected Properties
 
 | name             | type               | from self | from Config | from Sounds | visible? |
 | ---------------- | ------------------ | --------- | ----------- | ----------- | -------- |
-| wait_duration    | `<datetime>`       |           | yes         |             | -        |
+| wait_duration    | `<datetime>`       |           | context     |             | -        |
 | sound_path       | str                |           |             | yes         | -        |
 | is_alarm_set     | bool               | yes       |             |             | yes      |
 | alarm_time       | `<datetime>`, None | yes       |             |             | yes      |
 | is_sound_playing | bool               |           |             | yes         | -        |
-| snooze_duration  | `<datetime>`       |           | yes         |             | -        |
+| snooze_duration  | `<datetime>`       |           | context     |             | -        |

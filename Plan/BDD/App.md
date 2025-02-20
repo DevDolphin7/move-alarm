@@ -292,15 +292,15 @@ And this should be remembered after computer reboot
 | --------------- | ------------ | --------- | ----------- | -------- |
 | config_path     | str          | yes       |             | -        |
 | command         | str          | yes       |             | -        |
-| config          | `<Config>`   | yes       |             | -        |
+| config          | `<Config>`   | context   |             | -        |
 | test_wav_path   | str          | yes       |             | -        |
 | args            | list[str]    | yes       |             | -        |
-| wait_duration   | `<datetime>` |           | yes         | -        |
-| snooze_duration | `<datetime>` |           | yes         | -        |
-| reminder_text   | str          |           | yes         | -        |
-| wav_directory   | str          |           | yes         | -        |
-| api_enabled     | bool         |           | yes         | -        |
-| sound_themes    | list[str]    |           | yes         | -        |
+| wait_duration   | `<datetime>` |           | context     | -        |
+| snooze_duration | `<datetime>` |           | context     | -        |
+| reminder_text   | str          |           | context     | -        |
+| wav_directory   | str          |           | context     | -        |
+| api_enabled     | bool         |           | context     | -        |
+| sound_themes    | list[str]    |           | context     | -        |
 | minutes_str     | str          | yes       |             | -        |
 | theme           | str          | yes       |             | -        |
 | url_regex       | re.Pattern   | yes       |             | -        |
