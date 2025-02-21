@@ -61,8 +61,10 @@ Then play a sound
 ### Functions
 
 - get_local_file
-- download_from_freesound
 - search_freesound
+- download_from_freesound
+- get_freesound
+- get_sound
 - play_sound
 
 ### Tests
@@ -74,30 +76,41 @@ Then play a sound
 - randomly selects a file from the directory
 - return str: wav file path
 
-#### download_from_freesound
-
-- required parameter str: directory path
-- keyword parameter list[str]: sound theme
-- invokes search_freesound with the sound theme
-- if there _is_ a valid result, downloads a wav sound to the directory path
-- if there _is_ a valid result, sets the wav path to the downloaded file
-- if there **is not** a valid result, warns the user
-- if there **is not** a valid result, sets the wav path to get_local_file return value
-- return str: wav file path
-
 #### search_freesound
 
-- required parameter list[str]: sound theme
+- required parameter list[str]: themes
 - searches for sound results from [Freesound](https://freesound.org)
 - returns a random sound result on success
 - returns None on failure
 
+#### download_from_freesound
+
+- required parameter str: directory path
+- downloads song from freesound
+- raises error on connection issue
+- return str: wav file path
+
+#### get_freesound
+
+- invokes `search_freesound` with the sound themes from config
+- if there _is_ a valid search result, invokes `download_from_fressound`
+- if there _is_ a valid result, returns the wav path to the downloaded file
+- if there **is not** a valid result, warns the user
+- if there **is not** a valid result, returns None
+
+#### get_sound
+
+- if `api_enabled` is **false**, invokes `get_local_file`
+- if `api_enabled` is _true_, invokes `get_freesound`
+- if `get_freesound` returns None, invokes `get_local_file`
+- returns str wav path
+
 #### play_sound
 
-- required parameter str: wav path
+- invokes `get_sound`
 - sets currently_playing to true
 - plays the sound
-- when the sound stops, sets currently_playing to false
+- when the sound stops, invokes `stop_sound`
 
 ### Properties
 
@@ -106,6 +119,7 @@ Then play a sound
 - sound_theme: list[str]
 - selected_sound: `<sound result>`
 - currently_playing: bool
+- api_enabled
 
 ## Stop Playing a Sound
 
@@ -151,14 +165,16 @@ Then all sounds should stop playing immediately
 
 ## Collected Properties
 
-| name           | type                     | from self | from Config | visible? |
-| -------------- | ------------------------ | --------- | ----------- | -------- |
-| auth           | `HandleAuthentification` | context   |             |          |
-| wav_directory  | str                      |           | yes         | -        |
-| wav_path       | str                      | yes       |             |          |
-| sound_theme    | list[str]                |           | yes         | -        |
-| selected_sound | `<sound result>`         | yes       |             | yes      |
-| is_playing     | bool                     | yes       |             | yes      |
+| name           | type                  | from self | from Contexts | visible? |
+| -------------- | --------------------- | --------- | ------------- | -------- |
+| contexts       | `Contexts`            | context   |               |          |
+| auth           | `HandleAuthorisation` |           | yes           |          |
+| wav_directory  | str                   |           | yes           | -        |
+| wav_path       | str                   | yes       |               |          |
+| sound_theme    | list[str]             |           | yes           | -        |
+| selected_sound | `<sound result>`      | yes       |               | yes      |
+| is_playing     | bool                  | yes       |               | yes      |
+| api_enabled    | bool                  |           | yes           |          |
 
 # References
 
