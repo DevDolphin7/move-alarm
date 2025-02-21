@@ -34,3 +34,16 @@ def search_for_sounds(token: str, themes: list[str] = []) -> list[SoundResultDic
         return result["results"]
 
     raise ConnectionError(response.text)
+
+
+def download_sound(token: str, url: str, new_path: str) -> bool:
+    with requests.get(
+        url, headers={"Authorization": f"Bearer {token}"}, stream=True
+    ) as response:
+        response.raise_for_status()
+
+        with open(new_path, "wb") as f:
+            for chunk in response.iter_content(chunk_size=8192):
+                f.write(chunk)
+
+    return True
