@@ -1,7 +1,7 @@
 import os, random
 import simpleaudio as sa  # type: ignore
-from move_alarm.contexts import auth
-from move_alarm.utils.api_calls import search_for_sounds
+from move_alarm.contexts import auth, config
+from move_alarm.utils.api_calls import search_for_sounds, download_sound
 from move_alarm.types.sounds import SoundResult
 
 
@@ -39,11 +39,24 @@ class Sounds:
 
         return SoundResult(id, url, name, description, download, license)
 
+    def download_from_freesound(self, url: str, new_path: str) -> str:
+        token = auth.get_token()
 
-def how_to_play_a_wav() -> None:
-    wave_obj = sa.WaveObject.from_wave_file(
-        os.path.join(os.path.dirname(__file__), "..", "assets", "fresh-pop-alert.wav")
-    )
+        download_sound(token, url, new_path)
+
+        if os.path.exists(new_path):
+            return new_path
+        raise FileNotFoundError(
+            f"Sound file should exist but could not be found: {new_path}"
+        )
+
+    def get_freesound(self) -> str | None:
+        print(config.sound_themes)
+        self.search_freesound(config.sound_themes)
+
+
+def how_to_play_a_wav(path) -> None:
+    wave_obj = sa.WaveObject.from_wave_file(path)
 
     play_obj = wave_obj.play()
     play_obj.wait_done()
