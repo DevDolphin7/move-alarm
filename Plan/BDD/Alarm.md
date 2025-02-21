@@ -123,11 +123,12 @@ Then the alarm is removed and will not sound
 
 ## Collected Properties
 
-| name             | type               | from self | from Config | from Sounds | visible? |
-| ---------------- | ------------------ | --------- | ----------- | ----------- | -------- |
-| wait_duration    | `<datetime>`       |           | context     |             | -        |
-| sound_path       | str                |           |             | yes         | -        |
-| is_alarm_set     | bool               | yes       |             |             | yes      |
-| alarm_time       | `<datetime>`, None | yes       |             |             | yes      |
-| is_sound_playing | bool               |           |             | yes         | -        |
-| snooze_duration  | `<datetime>`       |           | context     |             | -        |
+| name             | type               | from self | from Context | from Sounds | visible? |
+| ---------------- | ------------------ | --------- | ------------ | ----------- | -------- |
+| config           | `<Config>`         | context   |              |             |          |
+| wait_duration    | `<datetime>`       |           | yes          |             | -        |
+| sound_path       | str                |           |              | yes         | -        |
+| is_alarm_set     | bool               | yes       |              |             | yes      |
+| alarm_time       | `<datetime>`, None | yes       |              |             | yes      |
+| is_sound_playing | bool               |           |              | yes         | -        |
+| snooze_duration  | `<datetime>`       |           | yes          |             | -        |
