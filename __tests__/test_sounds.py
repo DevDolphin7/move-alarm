@@ -1,5 +1,6 @@
 import os, json
-import pytest
+import requests
+import pytest, pytest_mock
 from datetime import timedelta
 from move_alarm.components.sounds import Sounds
 from collections.abc import Callable
@@ -10,6 +11,11 @@ from move_alarm.types.sounds import SoundResult
 @pytest.fixture(scope="class")
 def define_wav_directory() -> str:
     return os.path.join(os.path.dirname(__file__)[:-9], "move_alarm", "assets")
+
+
+@pytest.fixture(scope="class")
+def define_new_sound_path(define_wav_directory) -> str:
+    return os.path.join(define_wav_directory, "mock_sound.wav")
 
 
 @pytest.fixture(scope="class", autouse=True)
@@ -29,7 +35,29 @@ def config(request: pytest.FixtureRequest, define_wav_directory):
     )
 
 
+@pytest.fixture(scope="class", autouse=True)
+def new_sound_path(request: pytest.FixtureRequest):
+    request.cls.pytest_fixture_new_sound_path = os.path.join(
+        os.path.dirname(__file__), "..", "move_alarm", "assets", "mock_sound.wav"
+    )
+
+
 class TestSounds:
+
+    @property
+    def config(self) -> Config:
+        return self.pytest_fixture_config
+
+    @pytest.fixture(name="Mock HandleAuthorisation")
+    def mock_handle_authorisation(self, monkeypatch: pytest.MonkeyPatch):
+        monkeypatch.setattr("move_alarm.contexts.auth.get_token", lambda: "mock token")
+
+    @pytest.fixture(name="Mock Config")
+    def mock_config(self, monkeypatch: pytest.MonkeyPatch):
+        ########################################################### Needs work!
+        monkeypatch.setattr(
+            "move_alarm.contexts.config.sound_themes", self.config.sound_themes
+        )
 
     @pytest.fixture
     def mock_api_search_result(self) -> Callable[[], list[SoundResult]]:
@@ -42,10 +70,6 @@ class TestSounds:
             return data
 
         return _mock_api_search_result
-
-    @pytest.fixture(name="Mock HandleAuthorisation.get_token")
-    def mock_handle_authorisation(self, monkeypatch: pytest.MonkeyPatch):
-        monkeypatch.setattr("move_alarm.contexts.auth.get_token", lambda: "mock token")
 
     @pytest.fixture(name="200 mock api sound search")
     def mock_200_sound_search(
@@ -95,6 +119,35 @@ class TestSounds:
 
         monkeypatch.setattr("requests.get", lambda _, headers: MockResponse())
 
+    @pytest.fixture(name="200 mock api sound download")
+    def mock_200_sound_download(self, monkeypatch: pytest.MonkeyPatch):
+        class MockResponse:
+            def raise_for_status(self):
+                return None
+
+            def iter_content(chunk_size=1):
+                return []
+
+        class MockWith:
+            def __enter__(self):
+                return MockResponse()
+
+            def __exit__(self, type, value, traceback):
+                return True
+
+        monkeypatch.setattr("requests.get", lambda _, headers, stream: MockWith())
+
+    @pytest.fixture(name="500 mock api sound download error")
+    def mock_500_sound_download_error(self, monkeypatch: pytest.MonkeyPatch):
+        class MockWith:
+            def __enter__(self):
+                raise requests.exceptions.HTTPError("Mock download issue")
+
+            def __exit__(self, type, value, traceback):
+                return True
+
+        monkeypatch.setattr("requests.get", lambda _, headers, stream: MockWith())
+
     class TestGetLocalFile:
 
         @property
@@ -140,7 +193,7 @@ class TestSounds:
             with pytest.raises(FileNotFoundError):
                 sound.get_local_file(invalid_dir_name)
 
-    @pytest.mark.usefixtures("Mock HandleAuthorisation.get_token")
+    @pytest.mark.usefixtures("Mock HandleAuthorisation")
     class TestSearchFreesound:
 
         @property
@@ -189,10 +242,70 @@ class TestSounds:
             with pytest.raises(ConnectionError):
                 sound.search_freesound(self.config.sound_themes)
 
+    @pytest.mark.usefixtures("Mock HandleAuthorisation")
+    class TestDownloadFromFreesound:
+
+        @pytest.mark.usefixtures("200 mock api sound download")
+        def test_requires_url_argument(self):
+            sound = Sounds()
+
+            with pytest.raises(TypeError):
+                sound.download_from_freesound()
+
+        @pytest.mark.usefixtures("200 mock api sound download")
+        def test_requires_directory_path_argument(self):
+            sound = Sounds()
+
+            with pytest.raises(TypeError):
+                sound.download_from_freesound("url")
+
+        @pytest.mark.usefixtures("200 mock api sound download")
+        def test_downloads_song_from_freesound(self, define_new_sound_path):
+            sound = Sounds()
+
+            new_file = sound.download_from_freesound("url", define_new_sound_path)
+
+            assert os.path.exists(new_file) == True
+
+        @pytest.mark.usefixtures("500 mock api sound download error")
+        def test_raises_error_on_connection_issue(self, define_new_sound_path):
+            sound = Sounds()
+
+            with pytest.raises(requests.exceptions.HTTPError):
+                sound.download_from_freesound("url", define_new_sound_path)
+
+        @pytest.mark.usefixtures("200 mock api sound download")
+        def test_returns_str_wav_file_path(self, define_new_sound_path):
+            sound = Sounds()
+
+            new_file_path = sound.download_from_freesound("url", define_new_sound_path)
+
+            assert isinstance(new_file_path, str) == True
+
+    @pytest.mark.usefixtures("Mock HandleAuthorisation")
+    class TestGetFreesound:
+
+        @property
+        def config(self) -> Config:
+            return self.pytest_fixture_config
+
+        def test_invokes_search_freesound_with_the_sound_themes_from_config(
+            self, mocker: pytest_mock.MockerFixture
+        ):
+            mock_search_freesound = mocker.patch(
+                "move_alarm.components.sounds.Sounds.search_freesound"
+            )
+
+            sound = Sounds()
+            sound.get_freesound()
+
+            mock_search_freesound.assert_called_once_with(self.config.sound_themes)
+
 
 ###----------------------------------
 # Methods to do:
 
-# download_from_freesound
+# get_freesound
+# get_sound
 # play_sound
 # stop_sound
