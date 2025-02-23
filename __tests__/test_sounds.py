@@ -5,6 +5,7 @@ from datetime import timedelta
 from move_alarm.components.sounds import Sounds
 from collections.abc import Callable
 from move_alarm.types.config import Config
+from move_alarm.types.contexts import Contexts
 from move_alarm.types.sounds import SoundResult
 
 
@@ -24,18 +25,6 @@ def env_path(request: pytest.FixtureRequest, define_wav_directory):
 
 
 @pytest.fixture(scope="class", autouse=True)
-def config(request: pytest.FixtureRequest, define_wav_directory):
-    request.cls.pytest_fixture_config = Config(
-        wait_duration=timedelta(minutes=60),
-        snooze_duration=timedelta(minutes=5),
-        reminder_text="Time to move!",
-        wav_directory=define_wav_directory,
-        api_enabled=True,
-        sound_themes=["piano", "guitar"],
-    )
-
-
-@pytest.fixture(scope="class", autouse=True)
 def new_sound_path(request: pytest.FixtureRequest):
     request.cls.pytest_fixture_new_sound_path = os.path.join(
         os.path.dirname(__file__), "..", "move_alarm", "assets", "mock_sound.wav"
@@ -45,18 +34,26 @@ def new_sound_path(request: pytest.FixtureRequest):
 class TestSounds:
 
     @property
-    def config(self) -> Config:
-        return self.pytest_fixture_config
+    def mock_config(self) -> Config:
+        return Config(
+            wait_duration=timedelta(minutes=60),
+            snooze_duration=timedelta(minutes=5),
+            reminder_text="Time to move!",
+            wav_directory=define_wav_directory,
+            api_enabled=True,
+            sound_themes=["piano", "guitar"],
+        )
 
-    @pytest.fixture(name="Mock HandleAuthorisation")
-    def mock_handle_authorisation(self, monkeypatch: pytest.MonkeyPatch):
-        monkeypatch.setattr("move_alarm.contexts.auth.get_token", lambda: "mock token")
+    @pytest.fixture(name="Mock Context")
+    def mock_context(self, monkeypatch: pytest.MonkeyPatch):
+        class MockAuth:
+            def get_token(self):
+                return "mock token"
 
-    @pytest.fixture(name="Mock Config")
-    def mock_config(self, monkeypatch: pytest.MonkeyPatch):
-        ########################################################### Needs work!
+        mock_contexts = Contexts(MockAuth(), self.mock_config)
+
         monkeypatch.setattr(
-            "move_alarm.contexts.config.sound_themes", self.config.sound_themes
+            "move_alarm.components.sounds.use_context", lambda: mock_contexts
         )
 
     @pytest.fixture
@@ -193,12 +190,12 @@ class TestSounds:
             with pytest.raises(FileNotFoundError):
                 sound.get_local_file(invalid_dir_name)
 
-    @pytest.mark.usefixtures("Mock HandleAuthorisation")
+    @pytest.mark.usefixtures("Mock Context")
     class TestSearchFreesound:
 
         @property
         def config(self) -> Config:
-            return self.pytest_fixture_config
+            return TestSounds.mock_config.fget(self)
 
         @pytest.mark.usefixtures("200 mock api sound search")
         def test_requires_sound_theme_argument(self):
@@ -242,7 +239,7 @@ class TestSounds:
             with pytest.raises(ConnectionError):
                 sound.search_freesound(self.config.sound_themes)
 
-    @pytest.mark.usefixtures("Mock HandleAuthorisation")
+    @pytest.mark.usefixtures("Mock Context")
     class TestDownloadFromFreesound:
 
         @pytest.mark.usefixtures("200 mock api sound download")
@@ -282,12 +279,12 @@ class TestSounds:
 
             assert isinstance(new_file_path, str) == True
 
-    @pytest.mark.usefixtures("Mock HandleAuthorisation")
+    @pytest.mark.usefixtures("Mock Context")
     class TestGetFreesound:
 
         @property
         def config(self) -> Config:
-            return self.pytest_fixture_config
+            return TestSounds.mock_config.fget(self)
 
         def test_invokes_search_freesound_with_the_sound_themes_from_config(
             self, mocker: pytest_mock.MockerFixture
