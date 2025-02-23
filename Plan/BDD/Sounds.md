@@ -95,13 +95,13 @@ Then play a sound
 - invokes `search_freesound` with the sound themes from config
 - if there _is_ a valid search result, invokes `download_from_fressound`
 - if there _is_ a valid result, returns the wav path to the downloaded file
-- if there **is not** a valid result, warns the user
-- if there **is not** a valid result, returns None
+- if there **is not** a valid search result, returns None
 
 #### get_sound
 
 - if `api_enabled` is **false**, invokes `get_local_file`
 - if `api_enabled` is _true_, invokes `get_freesound`
+- if `get_freesound` returns None, warns user
 - if `get_freesound` returns None, invokes `get_local_file`
 - returns str wav path
 
