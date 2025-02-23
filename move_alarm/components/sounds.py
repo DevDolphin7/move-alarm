@@ -1,6 +1,6 @@
 import os, random
 import simpleaudio as sa  # type: ignore
-from move_alarm.contexts import auth, config
+from move_alarm.contexts import use_context
 from move_alarm.utils.api_calls import search_for_sounds, download_sound
 from move_alarm.types.sounds import SoundResult
 
@@ -18,9 +18,8 @@ class Sounds:
         return os.path.join(dir_path, files[index])
 
     def search_freesound(self, themes: list[str]) -> SoundResult | None:
+        auth = use_context().auth
         token = auth.get_token()
-        if token == None:
-            raise ValueError("Unexpected error: Unable to get an access token")
 
         sounds = search_for_sounds(token, themes=themes)
 
@@ -40,6 +39,7 @@ class Sounds:
         return SoundResult(id, url, name, description, download, license)
 
     def download_from_freesound(self, url: str, new_path: str) -> str:
+        auth = use_context().auth
         token = auth.get_token()
 
         download_sound(token, url, new_path)
@@ -51,7 +51,8 @@ class Sounds:
         )
 
     def get_freesound(self) -> str | None:
-        print(config.sound_themes)
+        config = use_context().config
+
         self.search_freesound(config.sound_themes)
 
 
