@@ -108,7 +108,7 @@ Then play a sound
 #### play_sound
 
 - invokes `get_sound`
-- sets currently_playing to true
+- sets is_playing to true
 - plays the sound
 - when the sound stops, invokes `stop_sound`
 
@@ -118,7 +118,7 @@ Then play a sound
 - wav_path: str
 - sound_theme: list[str]
 - selected_sound: `<sound result>`
-- currently_playing: bool
+- is_playing: bool
 - api_enabled
 
 ## Stop Playing a Sound
@@ -146,12 +146,12 @@ Then all sounds should stop playing immediately
 - return bool: false if no sound is playing
 - if one sound is playing, it immediately stops
 - if multiple sounds are playing, they all immediately stop
-- sets currently_playing to false
+- sets is_playing to false
 - return bool: true if a sound was made to stop playing
 
 ### Properties
 
-- currently_playing
+- is_playing
 
 # Summary
 
