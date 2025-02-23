@@ -6,6 +6,19 @@ import move_alarm.types as datatype
 
 
 class Sounds:
+
+    @property
+    def is_playing(self) -> bool:
+        return self.__is_playing
+
+    @is_playing.setter
+    def is_playing(self, boolean: bool) -> None:
+        if isinstance(boolean, bool):
+            self.__is_playing = boolean
+
+    def __init__(self):
+        self.is_playing = False
+
     def get_local_file(self, dir_path: str) -> str:
         files = [
             file
@@ -51,11 +64,36 @@ class Sounds:
     def get_freesound(self) -> str | None:
         config = use_context().config
 
-        self.search_freesound(config.sound_themes)
+        search_result = self.search_freesound(config.sound_themes)
 
+        if isinstance(search_result, datatype.SoundResult):
+            new_path = os.path.join(config.wav_directory, search_result.name)
 
-def how_to_play_a_wav(path) -> None:
-    wave_obj = sa.WaveObject.from_wave_file(path)
+            return self.download_from_freesound(search_result.download, new_path)
 
-    play_obj = wave_obj.play()
-    play_obj.wait_done()
+        return None
+
+    def get_sound(self) -> str:
+        config = use_context().config
+
+        if config.api_enabled:
+            sound = self.get_freesound()
+            if sound != None:
+                return sound
+            print(f"Info: Freesound returned no results for {config.sound_themes}")
+
+        return self.get_local_file(config.wav_directory)
+
+    def play_sound(self) -> None:
+        sound_path = self.get_sound()
+
+        self.is_playing = True
+
+        wave_obj = sa.WaveObject.from_wave_file(sound_path)
+        play_obj = wave_obj.play()
+        play_obj.wait_done()
+
+        self.stop_sound()
+
+    def stop_sound(self) -> None:
+        return False
