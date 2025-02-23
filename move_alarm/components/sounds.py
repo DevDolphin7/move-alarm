@@ -1,8 +1,8 @@
 import os, random
 import simpleaudio as sa  # type: ignore
 from move_alarm.contexts import use_context
-from move_alarm.utils.api_calls import search_for_sounds, download_sound
-from move_alarm.types.sounds import SoundResult
+from move_alarm import utils
+import move_alarm.types as datatype
 
 
 class Sounds:
@@ -17,11 +17,10 @@ class Sounds:
 
         return os.path.join(dir_path, files[index])
 
-    def search_freesound(self, themes: list[str]) -> SoundResult | None:
-        auth = use_context().auth
-        token = auth.get_token()
+    def search_freesound(self, themes: list[str]) -> datatype.SoundResult | None:
+        token = utils.get_auth_token()
 
-        sounds = search_for_sounds(token, themes=themes)
+        sounds = utils.search_for_sounds(token, themes=themes)
 
         if len(sounds) == 0:
             return None
@@ -36,13 +35,12 @@ class Sounds:
         download = str(sound["download"])
         license = str(sound["license"])
 
-        return SoundResult(id, url, name, description, download, license)
+        return datatype.SoundResult(id, url, name, description, download, license)
 
     def download_from_freesound(self, url: str, new_path: str) -> str:
-        auth = use_context().auth
-        token = auth.get_token()
+        token = utils.get_auth_token()
 
-        download_sound(token, url, new_path)
+        utils.download_sound(token, url, new_path)
 
         if os.path.exists(new_path):
             return new_path

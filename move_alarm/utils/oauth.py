@@ -4,7 +4,7 @@ from random import randint
 from time import sleep
 import threading, re
 import dotenv
-from move_alarm.utils.api_calls import open_browser_to_api_auth, get_api_token
+from move_alarm import utils
 
 
 class HandleAuthorisation:
@@ -129,7 +129,7 @@ class HandleAuthorisation:
 
     def get_user_permission(self) -> bool:
         browser_thread = threading.Thread(
-            target=lambda: open_browser_to_api_auth(self.client_id, self._state)
+            target=lambda: utils.open_browser_to_api_auth(self.client_id, self._state)
         )
         browser_thread.start()
 
@@ -154,7 +154,7 @@ class HandleAuthorisation:
         else:
             url += f"&token={self.oauth_token}"
 
-        token_response = get_api_token(url)
+        token_response = utils.get_api_token(url)
 
         match token_response.status_code:
             case 200:

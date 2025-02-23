@@ -4,9 +4,7 @@ import pytest, pytest_mock
 from datetime import timedelta
 from move_alarm.components.sounds import Sounds
 from collections.abc import Callable
-from move_alarm.types.config import Config
-from move_alarm.types.contexts import Contexts
-from move_alarm.types.sounds import SoundResult
+import move_alarm.types as datatype
 
 
 @pytest.fixture(scope="class")
@@ -34,8 +32,8 @@ def new_sound_path(request: pytest.FixtureRequest):
 class TestSounds:
 
     @property
-    def mock_config(self) -> Config:
-        return Config(
+    def mock_config(self) -> datatype.Config:
+        return datatype.Config(
             wait_duration=timedelta(minutes=60),
             snooze_duration=timedelta(minutes=5),
             reminder_text="Time to move!",
@@ -50,14 +48,18 @@ class TestSounds:
             def get_token(self):
                 return "mock token"
 
-        mock_contexts = Contexts(MockAuth(), self.mock_config)
+        mock_contexts = datatype.Contexts(MockAuth(), self.mock_config)
 
         monkeypatch.setattr(
             "move_alarm.components.sounds.use_context", lambda: mock_contexts
         )
 
+        monkeypatch.setattr(
+            "move_alarm.utils.helpers.use_context", lambda: mock_contexts
+        )
+
     @pytest.fixture
-    def mock_api_search_result(self) -> Callable[[], list[SoundResult]]:
+    def mock_api_search_result(self) -> Callable[[], list[datatype.SoundResult]]:
         file_path = os.path.join(os.path.dirname(__file__), "mock_sounds_data.json")
 
         with open(file_path) as file:
@@ -194,7 +196,7 @@ class TestSounds:
     class TestSearchFreesound:
 
         @property
-        def config(self) -> Config:
+        def config(self) -> datatype.Config:
             return TestSounds.mock_config.fget(self)
 
         @pytest.mark.usefixtures("200 mock api sound search")
@@ -210,7 +212,7 @@ class TestSounds:
 
             result = sound.search_freesound(self.config.sound_themes)
 
-            assert isinstance(result, SoundResult) == True
+            assert isinstance(result, datatype.SoundResult) == True
 
         @pytest.mark.usefixtures("200 mock api sound search")
         def test_returns_a_random_sound_result_from_freesound(self):
@@ -283,7 +285,7 @@ class TestSounds:
     class TestGetFreesound:
 
         @property
-        def config(self) -> Config:
+        def config(self) -> datatype.Config:
             return TestSounds.mock_config.fget(self)
 
         def test_invokes_search_freesound_with_the_sound_themes_from_config(
