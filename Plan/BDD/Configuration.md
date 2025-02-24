@@ -18,8 +18,8 @@ And remembered the next time they log on
 
 > Scenario: A user wants to define the reminder message
 
-Given an alarm goes off to remind a user to move
-And the user defined what message to be displayed
+Given an alarm goes off to remind a user to move  
+And the user defined what message to be displayed  
 Then the reminder text can be configured  
 And remembered the next time they log on
 
@@ -47,43 +47,36 @@ Then the config file should be re-made
 
 - set_config_file
 - load_config_file
-- load_default_values
+- use_default_values
 
 ### Tests
 
+#### `__init__`
+
+- requires property: str config_path
+- raises type error on non str argument
+- invokes load config file on initialisation
+- warns user on loading error
+- invokes use default values on loading error
+- invokes set_config_file on loading error
+
 #### set_config_file
 
-- creates config file
-- config file contains wait_duration
-- config file contains snooze_duration
-- config file contains reminder_text
-- config file contains wav_directory
-- config file contains api_enabled
-- config file contains sound_theme
+- creates config file at config path
+- config file contains only valid properties
+- return bool: true on success
 
 #### load_config_file
 
-- required parameter str: config_path
-- sets wait_duration as instance of datetime
-- sets snooze_duration as instance of datetime
-- sets reminder_text as str
-- sets wav_directory as str
-- sets api_enabled as bool
-- sets sound_theme as str
+- sets all valid variables to valid data types
 - return bool: true on success
 - raises FileNotFoundError on missing file
 - raises ValueError on missing key
-- raises ValueError on incorrect value data type
+- raises TypeError on incorrect value data type
 
-#### load_default_values
+#### use_default_values
 
-- sets wait_duration to 1 hour
-- sets snooze_duration to 5 minutes
-- sets reminder_text to "Time to move!"
-- sets wav_directory to an example directory
-- sets api_enabled to false
-- sets sound_theme to piano or guitar
-- invokes set_config_file
+- sets appropriate default values
 
 ### Properties
 
@@ -99,9 +92,10 @@ Then the config file should be re-made
 
 ## Collected Functions
 
+- `__init__`
 - set_config_file
 - load_config_file
-- load_default_values
+- use_default_values
 
 ## Collected Properties
 

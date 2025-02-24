@@ -171,7 +171,7 @@ From here, you can enter various commands to control the application.
 
     💡 This will only look at the local directory where you want sounds to be selected from. Any exisiting log on information will be removed, see [Data Storage](#data-storage) for more information.
 
-  - **set theme** - Define the themes of the sounds you want to hear from [Freesound](https://freesound.org).
+  - **set themes** - Define the themes of the sounds you want to hear from [Freesound](https://freesound.org).
 
     ```
     MoveAlarm> set themes piano "acoustic guitar"

@@ -10,3 +10,20 @@ class Config:
     wav_directory: str
     api_enabled: str
     sound_themes: list[str]
+
+
+class IniFormattedAlarm(dict[str, int | str]):
+    interval: int
+    snooze: int
+    message: str
+
+
+class IniFormattedSounds(dict[str, str | bool | list[str]]):
+    path: str
+    freesound: bool
+    themes: list[str]
+
+
+class IniFormattedConfig(dict[str, IniFormattedAlarm | IniFormattedSounds]):
+    Alarm: IniFormattedAlarm
+    Sounds: IniFormattedSounds
