@@ -82,13 +82,13 @@ Then notification of success is provided to the user
 
 ### Tests
 
-- invokes set_alarm with `<config>`
+- invokes set_alarm with `<Config>`
 - user is notified of success
 - user is notified of failure
 
 ### Properties
 
-- config: `<config>`
+- config: `<Config>`
 
 ## Snooze
 
@@ -105,13 +105,13 @@ Then notification of success is provided to the user
 
 ### Tests
 
-- invokes snooze_alarm with `<config>`
+- invokes snooze_alarm with `<Config>`
 - user is notified of success
 - user is notified of failure
 
 ### Properties
 
-- config: `<config>`
+- config: `<Config>`
 
 ## Stop
 
@@ -210,6 +210,12 @@ Given the user does not want to download songs from the internet
 Then they should be able to configure the app to do so  
 And this should be remembered after computer reboot
 
+> Scenario: The user wants to start using sounds from [Freesound](https://freesound.org)
+
+Given the user has just enabled the [Freesound](https://freesound.org) api feature  
+Then they are able to log into their [Freesound](https://freesound.org) account  
+And this should be remembered after computer reboot
+
 > Scenario: The user wants to define their own sound themes from [Freesound](https://freesound.org)
 
 Given the user would like to define their own sound themes  
@@ -238,7 +244,7 @@ And this should be remembered after computer reboot
 - notifies user if invalid input given with correct example
 - updates sound_themes with a list of strings
 - notifies user is url banned characters are used with example themes
-- invokes set_config_file with `<config>`
+- invokes set_config_file with `<Config>`
 
 #### format_str_to_datetime
 
@@ -282,22 +288,22 @@ And this should be remembered after computer reboot
 
 ## Collected Properties
 
-| name            | type         | from self | from Config | visible? |
-| --------------- | ------------ | --------- | ----------- | -------- |
-| config_path     | str          | yes       |             | -        |
-| command         | str          | yes       |             | -        |
-| config          | `<config>`   | yes       |             | -        |
-| test_wav_path   | str          | yes       |             | -        |
-| args            | list[str]    | yes       |             | -        |
-| wait_duration   | `<datetime>` |           | yes         | -        |
-| snooze_duration | `<datetime>` |           | yes         | -        |
-| reminder_text   | str          |           | yes         | -        |
-| wav_directory   | str          |           | yes         | -        |
-| api_enabled     | bool         |           | yes         | -        |
-| sound_themes    | list[str]    |           | yes         | -        |
-| minutes_str     | str          | yes       |             | -        |
-| theme           | str          | yes       |             | -        |
-| url_regex       | re.Pattern   | yes       |             | -        |
+| name            | type         | from self | from Context | visible? |
+| --------------- | ------------ | --------- | ------------ | -------- |
+| config_path     | str          | yes       |              | -        |
+| command         | str          | yes       |              | -        |
+| config          | `<Config>`   | context   |              | -        |
+| test_wav_path   | str          | yes       |              | -        |
+| args            | list[str]    | yes       |              | -        |
+| wait_duration   | `<datetime>` |           | yes          | -        |
+| snooze_duration | `<datetime>` |           | yes          | -        |
+| reminder_text   | str          |           | yes          | -        |
+| wav_directory   | str          |           | yes          | -        |
+| api_enabled     | bool         |           | yes          | -        |
+| sound_themes    | list[str]    |           | yes          | -        |
+| minutes_str     | str          | yes       |              | -        |
+| theme           | str          | yes       |              | -        |
+| url_regex       | re.Pattern   | yes       |              | -        |
 
 # References
 

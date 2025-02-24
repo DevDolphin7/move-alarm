@@ -1,5 +1,27 @@
 # Sounds
 
+## `__init__`
+
+> Scenario: The user wants to get sounds from [Freesound](https://freesound.org)
+
+Given the user has the [Freesound](https://freesound.org) api enabled  
+And they have previously logged into [Freesound](https://freesound.org)  
+And the alarm is about to sound  
+Then authorisation is handled without the users knowledge  
+And a sound is downloaded
+
+### Functions
+
+None
+
+### Tests
+
+None
+
+### Properties
+
+- auth - this is handled by a context
+
 ## Play a Sound
 
 > Scenario: Play a sound
@@ -39,8 +61,10 @@ Then play a sound
 ### Functions
 
 - get_local_file
-- get_freesound_file
 - search_freesound
+- download_from_freesound
+- get_freesound
+- get_sound
 - play_sound
 
 ### Tests
@@ -52,30 +76,41 @@ Then play a sound
 - randomly selects a file from the directory
 - return str: wav file path
 
-#### get_freesound_file
-
-- required parameter str: directory path
-- keyword parameter list[str]: sound theme
-- invokes search_freesound with the sound theme
-- if there _is_ a valid result, downloads a wav sound to the directory path
-- if there _is_ a valid result, sets the wav path to the downloaded file
-- if there **is not** a valid result, warns the user
-- if there **is not** a valid result, sets the wav path to get_local_file return value
-- return str: wav file path
-
 #### search_freesound
 
-- required parameter list[str]: sound theme
+- required parameter list[str]: themes
 - searches for sound results from [Freesound](https://freesound.org)
 - returns a random sound result on success
 - returns None on failure
 
+#### download_from_freesound
+
+- required parameter str: directory path
+- downloads song from freesound
+- raises error on connection issue
+- return str: wav file path
+
+#### get_freesound
+
+- invokes `search_freesound` with the sound themes from config
+- if there _is_ a valid search result, invokes `download_from_fressound`
+- if there _is_ a valid result, returns the wav path to the downloaded file
+- if there **is not** a valid search result, returns None
+
+#### get_sound
+
+- if `api_enabled` is **false**, invokes `get_local_file`
+- if `api_enabled` is _true_, invokes `get_freesound`
+- if `get_freesound` returns None, warns user
+- if `get_freesound` returns None, invokes `get_local_file`
+- returns str wav path
+
 #### play_sound
 
-- required parameter str: wav path
-- sets currently_playing to true
+- invokes `get_sound`
+- sets is_playing to true
 - plays the sound
-- when the sound stops, sets currently_playing to false
+- when the sound stops, invokes `stop_sound` with the initiated sound
 
 ### Properties
 
@@ -83,7 +118,8 @@ Then play a sound
 - wav_path: str
 - sound_theme: list[str]
 - selected_sound: `<sound result>`
-- currently_playing: bool
+- is_playing: bool
+- api_enabled
 
 ## Stop Playing a Sound
 
@@ -110,32 +146,36 @@ Then all sounds should stop playing immediately
 - return bool: false if no sound is playing
 - if one sound is playing, it immediately stops
 - if multiple sounds are playing, they all immediately stop
-- sets currently_playing to false
+- sets is_playing to false
 - return bool: true if a sound was made to stop playing
+- a specific sound can be stopped
 
 ### Properties
 
-- currently_playing
+- is_playing
 
 # Summary
 
 ## Collected Functions
 
 - get_local_file
-- get_freesound_file
+- download_from_freesound
 - search_freesound
 - play_sound
 - stop_sound
 
 ## Collected Properties
 
-| name           | type             | from self | from Config | visible? |
-| -------------- | ---------------- | --------- | ----------- | -------- |
-| wav_directory  | str              |           | yes         | -        |
-| wav_path       | str              | yes       |             |          |
-| sound_theme    | list[str]        |           | yes         | -        |
-| selected_sound | `<sound result>` | yes       |             | yes      |
-| is_playing     | bool             | yes       |             | yes      |
+| name           | type                  | from self | from Contexts | visible? |
+| -------------- | --------------------- | --------- | ------------- | -------- |
+| contexts       | `Contexts`            | context   |               |          |
+| auth           | `HandleAuthorisation` |           | yes           |          |
+| wav_directory  | str                   |           | yes           | -        |
+| wav_path       | str                   | yes       |               |          |
+| sound_theme    | list[str]             |           | yes           | -        |
+| selected_sound | `<sound result>`      | yes       |               | yes      |
+| is_playing     | bool                  | yes       |               | yes      |
+| api_enabled    | bool                  |           | yes           |          |
 
 # References
 

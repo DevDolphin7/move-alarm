@@ -93,7 +93,7 @@ Then the config file should be re-made
 - reminder_text: str
 - wav_directory: str
 - api_enabled: bool
-- sound_theme: list[str]
+- sound_themes: list[str]
 
 # Summary
 

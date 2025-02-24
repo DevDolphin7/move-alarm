@@ -160,10 +160,16 @@ From here, you can enter various commands to control the application.
   - **set freesound** - Define whether to get sounds from [Freesound](https://freesound.org) or just use local files.
 
     ```
+    MoveAlarm> set freesound true
+    ```
+
+    💡 This will prompt you to log into [Freesound](https://freesound.org) and authorise the move-alarm app.
+
+    ```
     MoveAlarm> set freesound false
     ```
 
-    💡 This will only look at the local directory where you want sounds to be selected from.
+    💡 This will only look at the local directory where you want sounds to be selected from. Any exisiting log on information will be removed, see [Data Storage](#data-storage) for more information.
 
   - **set theme** - Define the themes of the sounds you want to hear from [Freesound](https://freesound.org).
 
@@ -187,6 +193,8 @@ poetry run pytest
 
 Test files are located in the `__tests__` directory at the project's root. 🧪
 
+Testing will not make any real API calls, instead mocking returns values for the required functions. If you have logged into freesound, your data will be still be remembered (tests produce a `.env.test` file while the live app uses a `.env` file). See [Data Storage](#data-storage).
+
 # 🔄 Continuous Integration
 
 MoveAlarm utilizes [GitHub Actions](https://github.com/features/actions) for continuous integration. The CI pipeline automates linting and testing for each pull request to ensure code quality before merging into the main branch. ⚡
@@ -194,6 +202,18 @@ MoveAlarm utilizes [GitHub Actions](https://github.com/features/actions) for con
 # 📜 License
 
 This project is licensed under the [MIT License](https://opensource.org/licenses/MIT). 📄
+
+# Data Storage
+
+This app only stores data locally on the device. No data is stored online.
+
+If you choose to _use_ sounds from [Freesound](https://freesound.org), a local `.env` file will be created in the root directory of the app to store the Client ID you provide. The `.env` file will also store any refresh token recieved by the [Freesound API](https://freesound.org/docs/api/authentication.html) for future authentification requests.
+
+If you do **not enable** [Freesound](https://freesound.org), a local `.env` _file will not be created_. If you decide to **disable** [Freesound](https://freesound.org), the `.env` _file will be removed_. This means if you change your mind, you will need to re-sign into [Freesound](https://freesound.org) when re-enabling.
+
+To use [Freesound](https://freesound.org) with MoveAlarm, a list of valid Client IDs is checked before each request. If you wish to use [Freesound](https://freesound.org) with MoveAlarm, please get in touch to add your ID to the valid list, see [Contact](#contact).
+
+Configuration settings are stored in a local `.ini` file in the root folder. If the file is missing or corrupt, default values will be used **and** an attempt to restore the `.ini` file will be made. As default, [Freesound](https://freesound.org) is **not enabled**.
 
 # 📡 Contact
 
