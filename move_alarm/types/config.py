@@ -14,17 +14,17 @@ class Config:
 
 
 class IniFormattedAlarm(TypedDict):
-    wait_duration: timedelta
-    snooze_duration: timedelta
-    reminder_text: str
+    interval: int
+    snooze: int
+    message: str
 
 
 class IniFormattedSounds(TypedDict):
-    wav_directory: str
-    api_enabled: str
-    sound_themes: list[str]
+    path: str
+    freesound: bool
+    themes: list[str]
 
 
 class IniFormattedConfig(TypedDict):
-    Alarm = IniFormattedAlarm
-    Sounds = IniFormattedSounds
+    Alarm: IniFormattedAlarm
+    Sounds: IniFormattedSounds
