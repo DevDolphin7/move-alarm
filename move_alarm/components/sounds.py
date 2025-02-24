@@ -11,7 +11,7 @@ class Sounds:
     def is_playing(self) -> bool:
         return len(self._play_objects) != 0
 
-    def __init__(self):
+    def __init__(self) -> None:
         self._play_objects: list[sa.PlayObject] = []
 
     def get_local_file(self, dir_path: str) -> str:
@@ -90,7 +90,7 @@ class Sounds:
         play_object.wait_done()
         self.stop_sound(specific=play_object)
 
-    def stop_sound(self, specific: sa.PlayObject | None = None) -> None:
+    def stop_sound(self, specific: sa.PlayObject | None = None) -> bool:
         if self.is_playing:
 
             if specific != None:
