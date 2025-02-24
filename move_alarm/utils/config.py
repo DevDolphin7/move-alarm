@@ -104,18 +104,18 @@ class Configuration:
         self.sound_themes = ["funk"]
 
     def define_data_to_save(self) -> datatype.IniFormattedConfig:
-        return {
-            "Alarm": datatype.IniFormattedAlarm(
+        return datatype.IniFormattedConfig(
+            Alarm=datatype.IniFormattedAlarm(
                 interval=int(self.wait_duration.total_seconds()),
                 snooze=int(self.snooze_duration.total_seconds()),
                 message=self.reminder_text,
             ),
-            "Sounds": datatype.IniFormattedSounds(
+            Sounds=datatype.IniFormattedSounds(
                 path=self.wav_directory,
                 freesound=self.api_enabled,
                 themes=self.sound_themes,
             ),
-        }
+        )
 
     def set_config_file(self) -> bool:
         data = self.define_data_to_save()

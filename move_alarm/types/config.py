@@ -1,6 +1,5 @@
 from dataclasses import dataclass
 from datetime import timedelta
-from typing import TypedDict
 
 
 @dataclass
@@ -13,18 +12,18 @@ class Config:
     sound_themes: list[str]
 
 
-class IniFormattedAlarm(TypedDict):
+class IniFormattedAlarm(dict[str, int | str]):
     interval: int
     snooze: int
     message: str
 
 
-class IniFormattedSounds(TypedDict):
+class IniFormattedSounds(dict[str, str | bool | list[str]]):
     path: str
     freesound: bool
     themes: list[str]
 
 
-class IniFormattedConfig(TypedDict):
+class IniFormattedConfig(dict[str, IniFormattedAlarm | IniFormattedSounds]):
     Alarm: IniFormattedAlarm
     Sounds: IniFormattedSounds
