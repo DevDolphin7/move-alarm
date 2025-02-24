@@ -172,16 +172,26 @@ class TestSounds:
             ),
         )
 
-    @pytest.fixture(name="Mock WaveObject")
-    def replace_from_wave_file(self, monkeypatch: pytest.MonkeyPatch):
+    @pytest.fixture
+    def define_mock_play_object(self):
         class MockPlayObject:
             def wait_done(self):
                 return None
 
+            def stop(self):
+                print("stop was invoked from MockPlayObject!")
+                return None
+
+        return MockPlayObject
+
+    @pytest.fixture(name="Mock WaveObject")
+    def replace_from_wave_file(
+        self, monkeypatch: pytest.MonkeyPatch, define_mock_play_object
+    ):
         class MockWaveObject:
             def play(self):
                 print("play was invoked from MockWaveObject!")
-                return MockPlayObject()
+                return define_mock_play_object()
 
         self.mock_wave_object = MockWaveObject()
 
@@ -196,6 +206,23 @@ class TestSounds:
             "move_alarm.components.sounds.Sounds.stop_sound",
             lambda *args, **kwargs: None,
         )
+
+    @pytest.fixture
+    def mock_invoke_play_sound_times(
+        self, monkeypatch: pytest.MonkeyPatch, define_mock_play_object
+    ):
+        def replace_play_sound(invocations: int, sounds_self: Sounds) -> None:
+            def update_play_objs(*args, **kwargs):
+                for _ in range(0, invocations):
+                    sounds_self._play_objects.append(define_mock_play_object())
+
+            monkeypatch.setattr(
+                "move_alarm.components.sounds.Sounds.play_sound", update_play_objs
+            )
+
+            sounds_self.play_sound()
+
+        return replace_play_sound
 
     class TestGetLocalFile:
 
@@ -534,7 +561,6 @@ class TestSounds:
 
             mock_stop_sound.assert_called_once()
 
-    @pytest.mark.usefixtures("Mock Context api_enabled false")
     class TestStopSound:
 
         def test_return_bool_false_if_no_sound_is_playing(self):
@@ -543,6 +569,68 @@ class TestSounds:
             a_sound_was_stopped = sound.stop_sound()
 
             assert a_sound_was_stopped == False
+
+        def test_if_one_sound_is_playing_it_stops_immediately(
+            self, capfd: pytest.CaptureFixture, mock_invoke_play_sound_times
+        ):
+            sound = Sounds()
+            mock_invoke_play_sound_times(1, sound)
+
+            sound.stop_sound()
+
+            out, err = capfd.readouterr()
+
+            assert out == "stop was invoked from MockPlayObject!\n"
+
+        def test_if_multiple_sounds_are_playing_they_all_stop(
+            self, capfd: pytest.CaptureFixture, mock_invoke_play_sound_times
+        ):
+            sound = Sounds()
+            mock_invoke_play_sound_times(3, sound)
+
+            assert len(sound._play_objects) == 3
+
+            sound.stop_sound()
+
+            out, err = capfd.readouterr()
+
+            assert out == 3 * "stop was invoked from MockPlayObject!\n"
+            assert len(sound._play_objects) == 0
+
+        def test_stop_sound_sets_is_playing_to_false(
+            self, mock_invoke_play_sound_times
+        ):
+            sound = Sounds()
+            mock_invoke_play_sound_times(2, sound)
+
+            assert sound.is_playing == True
+
+            sound.stop_sound()
+
+            assert sound.is_playing == False
+
+        def test_returns_true_if_any_sound_was_stopped_playing(
+            self, mock_invoke_play_sound_times
+        ):
+            sound = Sounds()
+            mock_invoke_play_sound_times(1, sound)
+
+            a_sound_was_stopped = sound.stop_sound()
+
+            assert a_sound_was_stopped == True
+
+        def test_a_specific_sound_can_be_stopped(self, mock_invoke_play_sound_times):
+            sound = Sounds()
+            mock_invoke_play_sound_times(4, sound)
+            specific_sound = sound._play_objects[2]
+
+            assert len(set(sound._play_objects)) == 4
+            assert specific_sound in sound._play_objects
+
+            sound.stop_sound(specific_sound)
+
+            assert len(sound._play_objects) == 3
+            assert specific_sound not in sound._play_objects
 
 
 ###----------------------------------

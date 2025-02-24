@@ -9,15 +9,10 @@ class Sounds:
 
     @property
     def is_playing(self) -> bool:
-        return self.__is_playing
-
-    @is_playing.setter
-    def is_playing(self, boolean: bool) -> None:
-        if isinstance(boolean, bool):
-            self.__is_playing = boolean
+        return len(self._play_objects) != 0
 
     def __init__(self):
-        self.is_playing = False
+        self._play_objects: list[sa.PlayObject] = []
 
     def get_local_file(self, dir_path: str) -> str:
         files = [
@@ -87,13 +82,25 @@ class Sounds:
     def play_sound(self) -> None:
         sound_path = self.get_sound()
 
-        self.is_playing = True
-
         wave_obj = sa.WaveObject.from_wave_file(sound_path)
-        play_obj = wave_obj.play()
-        play_obj.wait_done()
 
-        self.stop_sound()
+        play_object = wave_obj.play()
+        self._play_objects.append(play_object)
 
-    def stop_sound(self) -> None:
+        play_object.wait_done()
+        self.stop_sound(specific=play_object)
+
+    def stop_sound(self, specific: sa.PlayObject | None = None) -> None:
+        if self.is_playing:
+
+            if specific != None:
+                specific.stop()
+                self._play_objects.pop(self._play_objects.index(specific))
+
+            else:
+                [play_obj.stop() for play_obj in self._play_objects]
+                [self._play_objects.pop() for _ in range(0, len(self._play_objects))]
+
+            return True
+
         return False
