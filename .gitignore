@@ -172,3 +172,4 @@ cython_debug/
 
 *.env*
 mock_sound.wav
+test_config.ini
