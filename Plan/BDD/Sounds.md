@@ -110,7 +110,7 @@ Then play a sound
 - invokes `get_sound`
 - sets is_playing to true
 - plays the sound
-- when the sound stops, invokes `stop_sound`
+- when the sound stops, invokes `stop_sound` with the initiated sound
 
 ### Properties
 
@@ -148,6 +148,7 @@ Then all sounds should stop playing immediately
 - if multiple sounds are playing, they all immediately stop
 - sets is_playing to false
 - return bool: true if a sound was made to stop playing
+- a specific sound can be stopped
 
 ### Properties
 
