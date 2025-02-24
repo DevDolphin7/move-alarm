@@ -58,6 +58,7 @@ Then the config file should be re-made
 - invokes load config file on initialisation
 - warns user on loading error
 - invokes use default values on loading error
+- invokes set_config_file on loading error
 
 #### set_config_file
 
@@ -76,7 +77,6 @@ Then the config file should be re-made
 #### use_default_values
 
 - sets appropriate default values
-- invokes set_config_file
 
 ### Properties
 
