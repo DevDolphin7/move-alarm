@@ -18,8 +18,8 @@ And remembered the next time they log on
 
 > Scenario: A user wants to define the reminder message
 
-Given an alarm goes off to remind a user to move
-And the user defined what message to be displayed
+Given an alarm goes off to remind a user to move  
+And the user defined what message to be displayed  
 Then the reminder text can be configured  
 And remembered the next time they log on
 
@@ -51,15 +51,14 @@ Then the config file should be re-made
 
 ### Tests
 
+#### `__init__`
+
+- requires property: str config_path
+
 #### set_config_file
 
-- creates config file
-- config file contains wait_duration
-- config file contains snooze_duration
-- config file contains reminder_text
-- config file contains wav_directory
-- config file contains api_enabled
-- config file contains sound_theme
+- creates config file at config path
+- config file contains only valid properties
 
 #### load_config_file
 
@@ -99,6 +98,7 @@ Then the config file should be re-made
 
 ## Collected Functions
 
+- `__init__`
 - set_config_file
 - load_config_file
 - load_default_values
