@@ -15,9 +15,12 @@ Then a sound should play after the wait duration
 
 ### Tests
 
+#### `__init__`
+
+- sets property is_set: bool to false
+
 #### set_alarm
 
-- required parameter datetime: wait duration
 - updates property to reflect alarm is set
 - waits for wait duration without halting the program
 - after wait duration, plays a sound
@@ -87,12 +90,12 @@ Then the alarm is removed and will not sound
 
 ### Functions
 
-- is_alarm_set
+- is_set
 - remove_alarm
 
 ### Tests
 
-#### is_alarm_set
+#### is_set
 
 - return bool
 - returns true if the alarm _is_ waiting to play
@@ -118,7 +121,7 @@ Then the alarm is removed and will not sound
 - set_alarm
 - is_sound_currently_playing -> could be a class property
 - snooze_alarm
-- is_alarm_set -> could be a class property
+- is_set -> could be a class property
 - remove_alarm
 
 ## Collected Properties
@@ -128,7 +131,7 @@ Then the alarm is removed and will not sound
 | config           | `<Config>`         | context   |              |             |          |
 | wait_duration    | `<datetime>`       |           | yes          |             | -        |
 | sound_path       | str                |           |              | yes         | -        |
-| is_alarm_set     | bool               | yes       |              |             | yes      |
+| is_set           | bool               | yes       |              |             | yes      |
 | alarm_time       | `<datetime>`, None | yes       |              |             | yes      |
 | is_sound_playing | bool               |           |              | yes         | -        |
 | snooze_duration  | `<datetime>`       |           | yes          |             | -        |
