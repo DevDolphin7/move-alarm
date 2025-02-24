@@ -56,6 +56,7 @@ Then the config file should be re-made
 - requires property: str config_path
 - raises type error on non str argument
 - invokes load config file on initialisation
+- warns user on loading error
 - invokes use default values on loading error
 
 #### set_config_file
