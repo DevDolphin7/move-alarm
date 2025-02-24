@@ -83,7 +83,7 @@ class Configuration:
         else:
             raise TypeError("list[str] required for sound_themes")
 
-    def __init__(self, config_path: str):
+    def __init__(self, config_path: str) -> None:
         self.config_path = config_path
 
         try:
