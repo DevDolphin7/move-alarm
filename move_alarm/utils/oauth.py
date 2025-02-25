@@ -1,9 +1,6 @@
-from os import path
+import os, random, re, dotenv
+import threading, time
 from datetime import datetime
-from random import randint
-from time import sleep
-import threading, re
-import dotenv
 from move_alarm import utils
 import move_alarm.types as datatype
 
@@ -38,7 +35,7 @@ class HandleAuthorisation(datatype.OauthObject):
         self.__oauth_code = code
 
     def __init__(self, client_id: str = "Load from .env file") -> None:
-        self.__env_path: str = path.join(path.dirname(__file__)[:-5], ".env")
+        self.__env_path: str = os.path.join(os.path.dirname(__file__)[:-5], ".env")
 
         if client_id != "Load from .env file":
             self.client_id = client_id
@@ -53,7 +50,7 @@ class HandleAuthorisation(datatype.OauthObject):
         self.oauth_token: str | None = None
 
     def is_dotenv_file_recent(self) -> bool:
-        modded_unix = path.getmtime(self.__env_path)
+        modded_unix = os.path.getmtime(self.__env_path)
         env_modified_time: datetime = datetime.fromtimestamp(modded_unix)
         now: datetime = datetime.now()
         time_since_modifying = now - env_modified_time
@@ -91,14 +88,14 @@ class HandleAuthorisation(datatype.OauthObject):
             "z",
         ]
 
-        for _ in range(0, randint(8, 12)):
-            random_int: int = randint(0, 25)
+        for _ in range(0, random.randint(8, 12)):
+            random_int: int = random.randint(0, 25)
 
             if random_int < 9:
                 output += str(random_int)
             else:
-                index: int = randint(0, 25)
-                case: int = randint(0, 1)
+                index: int = random.randint(0, 25)
+                case: int = random.randint(0, 1)
                 if case == 0:
                     output += alphabet[index]
                 else:
@@ -139,7 +136,7 @@ class HandleAuthorisation(datatype.OauthObject):
             raise TimeoutError(
                 "Opening default browser timed out, user permissions could not be granted"
             )
-        sleep(1)
+        time.sleep(1)
 
         self.oauth_code = input("Please enter your authorisation code: ")
 
