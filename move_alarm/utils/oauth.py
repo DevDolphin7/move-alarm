@@ -5,9 +5,10 @@ from time import sleep
 import threading, re
 import dotenv
 from move_alarm import utils
+import move_alarm.types as datatype
 
 
-class HandleAuthorisation:
+class HandleAuthorisation(datatype.OauthObject):
 
     @property
     def client_id(self) -> str:
