@@ -147,6 +147,13 @@ class TestHandleAuthorisation:
 
         monkeypatch.setattr("requests.get", lambda _: MockResponse())
 
+    @pytest.fixture(name="Mock time sleep")
+    def mock_time_sleep(self, monkeypatch: pytest.MonkeyPatch):
+        monkeypatch.setattr(
+            "time.sleep",
+            lambda *args: None,
+        )
+
     class TestProperties:
         @property
         def env_path(self):
@@ -393,6 +400,7 @@ class TestHandleAuthorisation:
                 ha.load_dotenv_file()
 
     @pytest.mark.usefixtures("Prevent browser opening")
+    @pytest.mark.usefixtures("Mock time sleep")
     class TestGetUserPermission:
 
         def test_opens_browser_window_and_allows_user_to_enter_oauth_code(
@@ -498,6 +506,7 @@ class TestHandleAuthorisation:
                 ha.request_oauth_token()
 
     @pytest.mark.usefixtures("Prevent browser opening")
+    @pytest.mark.usefixtures("Mock time sleep")
     class TestGetToken:
 
         @property
