@@ -28,3 +28,7 @@ pytest = "^8.3.4"
 mypy = "^1.15.0"
 pytest-mock = "^3.14.0"
 
+[tool.pytest.ini_options]
+testpaths = [
+    "__tests__"
+]
