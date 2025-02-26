@@ -60,6 +60,7 @@ Then the sound should play after the snooze duration
 
 #### snooze_alarm
 
+- if alarm **is not** set, raises AlarmNotSet error
 - if sound **is not** currently playing, sound will not play until after wait duration and snooze duration
 - if sound _is_ currently playing, sound stops playing
 - if sound _is_ currently playing, sound starts playing immediatly after snooze duration
