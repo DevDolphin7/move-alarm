@@ -52,16 +52,9 @@ Then the sound should play after the snooze duration
 
 ### Functions
 
-- is_sound_currently_playing
 - snooze_alarm
 
 ### Tests
-
-#### is_sound_currently_playing
-
-- return bool
-- returns false if sound is not currently playing
-- returns true if sound is currently playing
 
 #### snooze_alarm
 
