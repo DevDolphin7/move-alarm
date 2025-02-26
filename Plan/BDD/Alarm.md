@@ -25,7 +25,6 @@ Then a sound should play after the wait duration
 - waits for wait duration without halting the program
 - after wait duration, plays a sound
 - return datetime: actual time alarm will sound on success
-- return none on failure
 
 ### Properties
 
