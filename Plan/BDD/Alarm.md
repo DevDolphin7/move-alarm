@@ -18,7 +18,7 @@ Then a sound should play after the wait duration
 #### `__init__`
 
 - sets property is_set: bool to false
-- sets property alarm_time: datetime | None to None
+- sets property time: datetime | None to None
 
 #### set_alarm
 
@@ -26,13 +26,13 @@ Then a sound should play after the wait duration
 - waits for wait duration without halting the program
 - after wait duration, plays a sound
 - return datetime: actual time alarm will sound on success
-- update alarm_time with set time
+- update time with set time
 
 ### Properties
 
 - wait_duration: datetime
 - alarm_set: bool
-- alarm_time: datetime | None
+- time: datetime | None
 
 ## Snooze Alarm
 
@@ -64,14 +64,14 @@ Then the sound should play after the snooze duration
 - if sound _is_ currently playing, sound stops playing
 - if sound _is_ currently playing, sound starts playing immediatly after snooze duration
 - return datetime: actual time alarm will sound
-- update alarm_time with new set time
+- update time property with new set time
 
 ### Properties
 
 - sound_playing: bool
 - snooze_duration: datetime
 - wait_duration
-- alarm_time
+- time
 
 ## Remove_alarm
 
@@ -103,7 +103,7 @@ Then the alarm is removed and will not sound
 - if alarm was removed, updates alarm set property
 - return bool: false if no alarm is set
 - return bool: true on success
-- update alarm_time to None
+- update time property to None
 
 ### Properties
 
@@ -127,6 +127,6 @@ Then the alarm is removed and will not sound
 | wait_duration    | `<datetime>`       |           | yes          |             | -        |
 | sound_path       | str                |           |              | yes         | -        |
 | is_set           | bool               | yes       |              |             | yes      |
-| alarm_time       | `<datetime>`, None | yes       |              |             | yes      |
+| time             | `<datetime>`, None | yes       |              |             | yes      |
 | is_sound_playing | bool               |           |              | yes         | -        |
 | snooze_duration  | `<datetime>`       |           | yes          |             | -        |
