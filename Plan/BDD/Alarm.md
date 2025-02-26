@@ -18,6 +18,7 @@ Then a sound should play after the wait duration
 #### `__init__`
 
 - sets property is_set: bool to false
+- sets property alarm_time: datetime | None to None
 
 #### set_alarm
 
@@ -25,6 +26,7 @@ Then a sound should play after the wait duration
 - waits for wait duration without halting the program
 - after wait duration, plays a sound
 - return datetime: actual time alarm will sound on success
+- update alarm_time with set time
 
 ### Properties
 
@@ -58,11 +60,11 @@ Then the sound should play after the snooze duration
 
 #### snooze_alarm
 
-- required parameter datetime: snooze duration
 - if sound **is not** currently playing, sound will not play until after wait duration and snooze duration
 - if sound _is_ currently playing, sound stops playing
 - if sound _is_ currently playing, sound starts playing immediatly after snooze duration
 - return datetime: actual time alarm will sound
+- update alarm_time with new set time
 
 ### Properties
 
@@ -101,6 +103,7 @@ Then the alarm is removed and will not sound
 - if alarm was removed, updates alarm set property
 - return bool: false if no alarm is set
 - return bool: true on success
+- update alarm_time to None
 
 ### Properties
 
