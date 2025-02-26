@@ -5,13 +5,13 @@ from typing import TypedDict
 class Sounds:
     @property
     def is_playing(self) -> bool:
-        pass
+        return False
 
     def play_sound(self) -> None:
         pass
 
-    def stop_sound(self) -> None:
-        pass
+    def stop_sound(self) -> bool:
+        return False
 
 
 @dataclass
