@@ -1,5 +1,5 @@
 import configparser, datetime, os
-import move_alarm.types as datatype
+import move_alarm.datatypes as datatype
 
 
 class Configuration(datatype.Config):

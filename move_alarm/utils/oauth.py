@@ -2,7 +2,7 @@ import os, random, re, dotenv
 import threading, time
 from datetime import datetime
 from move_alarm import utils
-import move_alarm.types as datatype
+import move_alarm.datatypes as datatype
 
 
 class HandleAuthorisation(datatype.OauthObject):

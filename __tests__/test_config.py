@@ -1,7 +1,7 @@
 import os, configparser, datetime
 import pytest, pytest_mock
 from move_alarm.utils.config import Configuration
-import move_alarm.types as datatype
+import move_alarm.datatypes as datatype
 
 
 class TestConfig:

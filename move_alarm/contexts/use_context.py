@@ -1,6 +1,6 @@
 import os
 from move_alarm import utils
-import move_alarm.types as datatype
+import move_alarm.datatypes as datatype
 
 cache: datatype.Contexts | None = None
 

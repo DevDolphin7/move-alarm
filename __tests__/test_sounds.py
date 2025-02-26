@@ -4,7 +4,7 @@ import pytest, pytest_mock
 from datetime import timedelta
 from move_alarm.components.sounds import Sounds
 from collections.abc import Callable
-import move_alarm.types as datatype
+import move_alarm.datatypes as datatype
 
 
 class TestSounds:

@@ -2,7 +2,7 @@ import os, random
 import simpleaudio as sa  # type: ignore
 from move_alarm.contexts import use_context
 from move_alarm import utils
-import move_alarm.types as datatype
+import move_alarm.datatypes as datatype
 
 
 class Sounds:
