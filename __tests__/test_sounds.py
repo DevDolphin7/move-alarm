@@ -631,9 +631,3 @@ class TestSounds:
 
             assert len(sound._play_objects) == 3
             assert specific_sound not in sound._play_objects
-
-
-###----------------------------------
-# Methods to do:
-
-# stop_sound
