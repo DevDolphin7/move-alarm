@@ -10,5 +10,6 @@ from move_alarm.datatypes.sounds import (
     SoundListResponse,
     SoundResultDict,
 )
+from move_alarm.datatypes.alarm import AlarmNotSetError
 from move_alarm.datatypes.oauth import OauthObject
 from move_alarm.datatypes.contexts import Contexts
