@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-import move_alarm.types as datatype
+import move_alarm.datatypes as datatype
 
 
 @dataclass
