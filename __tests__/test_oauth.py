@@ -216,7 +216,7 @@ class TestHandleAuthorisation:
             with open(self.env_path, "w") as file:
                 file.write("")
 
-            assert ha.is_dotenv_file_recent() == True
+            assert ha.is_dotenv_file_recent() is True
 
         @pytest.mark.usefixtures("Change env file modified date to 1 day ago")
         def test_returns_false_if_env_file_more_than_24_hours_old(self):
@@ -225,7 +225,7 @@ class TestHandleAuthorisation:
             with open(self.env_path, "w") as file:
                 file.write("")
 
-            assert ha.is_dotenv_file_recent() == False
+            assert ha.is_dotenv_file_recent() is False
 
         def test_raises_error_if_env_file_not_found(self):
             ha = HandleAuthorisation("client id")
@@ -240,7 +240,7 @@ class TestHandleAuthorisation:
 
             state = ha.generate_state()
 
-            assert type(state) == str
+            assert type(state) is str
 
         def test_state_length_is_8_to_12_characters(self):
             ha = HandleAuthorisation("client id")
@@ -257,7 +257,7 @@ class TestHandleAuthorisation:
 
             regex_result = re.fullmatch("^[A-Z0-9]{8,12}$", state, flags=re.I)
 
-            assert isinstance(regex_result, re.Match) == True
+            assert isinstance(regex_result, re.Match) is True
 
         def test_state_is_different_on_repeat_calls(self):
             ha = HandleAuthorisation("client id")
@@ -287,7 +287,7 @@ class TestHandleAuthorisation:
 
             ha.set_dotenv_file("token")
 
-            assert os.path.exists(self.env_path) == True
+            assert os.path.exists(self.env_path) is True
 
         def test_env_file_contains_correct_variables(self):
             ha = HandleAuthorisation("client id")
@@ -318,7 +318,7 @@ class TestHandleAuthorisation:
             ha = HandleAuthorisation("client id")
             ha.oauth_code = "mockcodemockcodemockcodemockcode"
 
-            assert ha.set_dotenv_file("token") == True
+            assert ha.set_dotenv_file("token") is True
 
         def test_client_state_is_randomly_generated_in_env_file(self):
             ha = HandleAuthorisation("client id")
@@ -329,7 +329,7 @@ class TestHandleAuthorisation:
             state = env_dict[self.valid_env_vars[1]]
             regex_result = re.fullmatch("^[A-Z0-9]{8,12}$", state, flags=re.I)
 
-            assert isinstance(regex_result, re.Match) == True
+            assert isinstance(regex_result, re.Match) is True
 
     class TestLoadDotenvFile:
 
@@ -412,17 +412,17 @@ class TestHandleAuthorisation:
 
             ha.get_user_permission()
 
-            assert type(ha.oauth_code) == str
+            assert type(ha.oauth_code) is str
             assert len(ha.oauth_code) == 40
 
             regex_result = re.fullmatch("^[A-Z0-9]{40}$", ha.oauth_code, flags=re.I)
-            assert isinstance(regex_result, re.Match) == True
+            assert isinstance(regex_result, re.Match) is True
 
         def test_returns_true_on_success(self, mock_input_to_terminal):
             ha = HandleAuthorisation("client id")
 
             mock_input_to_terminal("6Wc9r2zbAcatxfjnAB63hzsOElGCtlbXmn3ZHzJh")
-            assert ha.get_user_permission() == True
+            assert ha.get_user_permission() is True
 
         def test_raises_error_on_invalid_oauth_code(self, mock_input_to_terminal):
             ha = HandleAuthorisation("client id")
@@ -601,4 +601,4 @@ class TestHandleAuthorisation:
             token = ha.get_token()
 
             assert token == "64c64660ceed813476b314f52136d9698e075622"
-            assert ha.oauth_code == None
+            assert ha.oauth_code is None

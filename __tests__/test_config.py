@@ -159,12 +159,12 @@ class TestConfig:
             return TestConfig.config_path.fget(self)
 
         def test_creates_a_config_file_at_config_path(self):
-            assert os.path.exists(self.config_path) == False
+            assert os.path.exists(self.config_path) is False
 
             config = Configuration(self.config_path)
             config.set_config_file()
 
-            assert os.path.exists(self.config_path) == True
+            assert os.path.exists(self.config_path) is True
 
         def test_config_file_contains_only_valid_properties(self):
             config = Configuration(self.config_path)
@@ -186,24 +186,24 @@ class TestConfig:
             sound_themes = list(output.get("Sounds", "themes"))
 
             for var in [wait_duration, snooze_duration]:
-                assert isinstance(var, datetime.timedelta) == True
+                assert isinstance(var, datetime.timedelta) is True
 
             for var in [reminder_text, wav_directory]:
-                assert isinstance(var, str) == True
+                assert isinstance(var, str) is True
 
-            assert isinstance(api_enabled, bool) == True
-            assert isinstance(sound_themes, list) == True
+            assert isinstance(api_enabled, bool) is True
+            assert isinstance(sound_themes, list) is True
 
             assert len(sound_themes) > 0
             for theme in sound_themes:
-                assert isinstance(theme, str) == True
+                assert isinstance(theme, str) is True
 
         def test_returns_true_on_success(self):
             config = Configuration(self.config_path)
 
             output = config.set_config_file()
 
-            assert output == True
+            assert output is True
 
     class TestLoadConfig:
 
@@ -218,12 +218,12 @@ class TestConfig:
 
             config.load_config_file()
 
-            assert isinstance(config.wait_duration, datetime.timedelta) == True
-            assert isinstance(config.snooze_duration, datetime.timedelta) == True
-            assert isinstance(config.reminder_text, str) == True
-            assert isinstance(config.wav_directory, str) == True
-            assert isinstance(config.api_enabled, bool) == True
-            assert isinstance(config.sound_themes, list) == True
+            assert isinstance(config.wait_duration, datetime.timedelta) is True
+            assert isinstance(config.snooze_duration, datetime.timedelta) is True
+            assert isinstance(config.reminder_text, str) is True
+            assert isinstance(config.wav_directory, str) is True
+            assert isinstance(config.api_enabled, bool) is True
+            assert isinstance(config.sound_themes, list) is True
 
         @pytest.mark.usefixtures("Create good mock config file")
         def test_returns_true_on_success(self):
@@ -231,7 +231,7 @@ class TestConfig:
 
             output = config.load_config_file()
 
-            assert output == True
+            assert output is True
 
         @pytest.mark.usefixtures(
             "Prevent set_config_file initiation call creating a new file"
@@ -278,5 +278,5 @@ class TestConfig:
             assert config.wav_directory == os.path.join(
                 os.path.dirname(__file__)[:-9], "move_alarm", "assets"
             )
-            assert config.api_enabled == False
+            assert config.api_enabled is False
             assert config.sound_themes == ["funk"]

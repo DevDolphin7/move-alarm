@@ -13,7 +13,7 @@ class HandleAuthorisation(datatype.OauthObject):
 
     @client_id.setter
     def client_id(self, id: str) -> None:
-        if type(id) == str:
+        if type(id) is str:
             self.__client_id = id
         else:
             raise TypeError("client_id must be a string")
@@ -26,7 +26,7 @@ class HandleAuthorisation(datatype.OauthObject):
     def oauth_code(self, code: str | None) -> None:
         if code != None:
             regex_result = re.fullmatch("^[A-Z0-9]{25,45}$", code, flags=re.I)
-            if isinstance(regex_result, re.Match) == False:
+            if isinstance(regex_result, re.Match) is False:
                 raise (
                     ValueError(
                         "Please enter a valid Freesound authorisation code, see https://freesound.org/docs/api/authentication.html"
