@@ -5,7 +5,7 @@ from move_alarm import utils
 import move_alarm.datatypes as datatype
 
 
-class Sounds:
+class Sounds(datatype.Sounds):
 
     @property
     def is_playing(self) -> bool:
