@@ -63,4 +63,4 @@ class Alarm:
         return self.time
 
     def remove_alarm(self) -> bool:
-        print(self.is_set)
+        print(threading.enumerate())
