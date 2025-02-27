@@ -8,12 +8,15 @@ import move_alarm.datatypes as datatype
 
 class Alarm:
     _sounds: datatype.Sounds = components.Sounds()
-    __is_set: bool = False
     __time: datetime = datetime.fromtimestamp(0)
 
     @property
     def is_set(self) -> bool:
-        return self.__is_set
+        alarm_threads = [
+            thread for thread in threading.enumerate() if thread.name == "MoveAlarm"
+        ]
+
+        return len(alarm_threads) > 0
 
     @property
     def time(self) -> datetime:
@@ -34,7 +37,6 @@ class Alarm:
         set_alarm.name = "MoveAlarm"
         set_alarm.start()
 
-        self.__is_set = True
         self.__time = datetime.now() + config.wait_duration
 
         return self.__time
@@ -59,3 +61,6 @@ class Alarm:
             self.set_alarm(snooze=True)
 
         return self.time
+
+    def remove_alarm(self) -> bool:
+        print(self.is_set)
