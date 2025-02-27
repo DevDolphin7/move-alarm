@@ -5,10 +5,14 @@ from move_alarm.contexts import use_context
 from move_alarm import components
 import move_alarm.datatypes as datatype
 
+lock = threading.Lock()
+
 
 class Alarm:
     _sounds: datatype.Sounds = components.Sounds()
     __time: datetime = datetime.fromtimestamp(0)
+    __stop_alarm: bool = False
+    __lock = None
 
     @property
     def is_set(self) -> bool:
@@ -27,6 +31,9 @@ class Alarm:
         return self._sounds
 
     def set_alarm(self, snooze: bool = False) -> datetime:
+        if self.is_set and not snooze:
+            return self.__time
+
         config = use_context().config
 
         interval = (
@@ -42,7 +49,15 @@ class Alarm:
         return self.__time
 
     def thread_alarm(self, interval) -> None:
-        time.sleep(interval)
+        print(self.__stop_alarm)
+        for _ in range(0, interval):
+            with lock:
+                if self.__stop_alarm:
+                    print("Stopping early!")
+                    self.__stop_alarm = False
+                    return
+
+            time.sleep(1)
 
         self.sounds.play_sound()
 
@@ -63,4 +78,9 @@ class Alarm:
         return self.time
 
     def remove_alarm(self) -> bool:
-        print(threading.enumerate())
+        print("remove called")
+        for thread in threading.enumerate():
+            if thread.name == "MoveAlarm":
+                with lock:
+                    self.__stop_alarm = True
+                print(f"__stop_alarm set to {self.__stop_alarm}")
