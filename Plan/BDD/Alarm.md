@@ -27,6 +27,7 @@ Then a sound should play after the wait duration
 - after wait duration, plays a sound
 - return datetime: actual time alarm will sound on success
 - update time with set time
+- if alarm is already set, return the time it will sound
 
 ### Properties
 
