@@ -8,7 +8,7 @@ class Config:
     snooze_duration: timedelta
     reminder_text: str
     wav_directory: str
-    api_enabled: str
+    api_enabled: bool
     sound_themes: list[str]
 
 

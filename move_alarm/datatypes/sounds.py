@@ -2,6 +2,18 @@ from dataclasses import dataclass
 from typing import TypedDict
 
 
+class Sounds:
+    @property
+    def is_playing(self) -> bool:
+        return False
+
+    def play_sound(self) -> None:
+        pass
+
+    def stop_sound(self) -> bool:
+        return False
+
+
 @dataclass
 class SoundResult:
     id: int

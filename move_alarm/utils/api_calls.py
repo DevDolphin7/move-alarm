@@ -1,5 +1,5 @@
 import webbrowser, requests
-import move_alarm.types as datatype
+import move_alarm.datatypes as datatype
 
 
 def open_browser_to_api_auth(client_id: str, state: str | None = "") -> None:

@@ -4,7 +4,7 @@ import pytest, pytest_mock
 from datetime import timedelta
 from move_alarm.components.sounds import Sounds
 from collections.abc import Callable
-import move_alarm.types as datatype
+import move_alarm.datatypes as datatype
 
 
 class TestSounds:
@@ -244,7 +244,7 @@ class TestSounds:
 
             wav_path = sound.get_local_file(self.wav_directory)
 
-            assert isinstance(wav_path, str) == True
+            assert isinstance(wav_path, str) is True
             assert wav_path[-4:] == ".wav"
 
         def test_searches_given_dir_for_wav_file(self):
@@ -252,7 +252,7 @@ class TestSounds:
 
             wav_path = sound.get_local_file(self.wav_directory)
 
-            assert os.path.exists(wav_path) == True
+            assert os.path.exists(wav_path) is True
 
         def test_randomly_selects_a_file_from_the_directory(self):
             sound = Sounds()
@@ -301,7 +301,7 @@ class TestSounds:
 
             result = sound.search_freesound(self.config.sound_themes)
 
-            assert isinstance(result, datatype.SoundResult) == True
+            assert isinstance(result, datatype.SoundResult) is True
 
         @pytest.mark.usefixtures("200 mock api sound search")
         def test_returns_a_random_sound_result_from_freesound(self):
@@ -321,7 +321,7 @@ class TestSounds:
 
             result = sound.search_freesound(self.config.sound_themes)
 
-            assert result == None
+            assert result is None
 
         @pytest.mark.usefixtures("500 mock api unexpected error")
         def test_raises_error_on_non_200_response(self):
@@ -359,7 +359,7 @@ class TestSounds:
 
             new_file = sound.download_from_freesound("url", self.new_sound_path)
 
-            assert os.path.exists(new_file) == True
+            assert os.path.exists(new_file) is True
 
         @pytest.mark.usefixtures("500 mock api sound download error")
         def test_raises_error_on_connection_issue(self):
@@ -374,7 +374,7 @@ class TestSounds:
 
             new_file_path = sound.download_from_freesound("url", self.new_sound_path)
 
-            assert isinstance(new_file_path, str) == True
+            assert isinstance(new_file_path, str) is True
 
     @pytest.mark.usefixtures("Mock Context")
     @pytest.mark.usefixtures("Remove mock_sounds.wav file")
@@ -427,12 +427,12 @@ class TestSounds:
         def test_if_sound_downloaded_ok_return_wav_file_path(self):
             sound = Sounds()
 
-            assert os.path.exists(self.new_sound_path) == False
+            assert os.path.exists(self.new_sound_path) is False
 
             wav_path = sound.get_freesound()
 
             assert wav_path == self.new_sound_path
-            assert os.path.exists(wav_path) == True
+            assert os.path.exists(wav_path) is True
 
         @pytest.mark.usefixtures("200 mock api no results sound search")
         def test_if_no_search_result_returns_none(self):
@@ -440,7 +440,7 @@ class TestSounds:
 
             wav_path = sound.get_freesound()
 
-            assert wav_path == None
+            assert wav_path is None
 
     @pytest.mark.usefixtures("Remove mock_sounds.wav file")
     class TestGetSound:
@@ -512,8 +512,8 @@ class TestSounds:
             sound = Sounds()
             sound_path = sound.get_sound()
 
-            assert isinstance(sound_path, str) == True
-            assert os.path.exists(os.path.dirname(sound_path)) == True
+            assert isinstance(sound_path, str) is True
+            assert os.path.exists(os.path.dirname(sound_path)) is True
             mock_print.assert_called_once()
             mock_get_local_file.assert_called_once()
 
@@ -537,7 +537,7 @@ class TestSounds:
             sound = Sounds()
             sound.play_sound()
 
-            assert sound.is_playing == True
+            assert sound.is_playing is True
 
         @pytest.mark.usefixtures("Mock stop_sound")
         def test_plays_the_sound(self, capfd: pytest.CaptureFixture):
@@ -568,7 +568,7 @@ class TestSounds:
 
             a_sound_was_stopped = sound.stop_sound()
 
-            assert a_sound_was_stopped == False
+            assert a_sound_was_stopped is False
 
         def test_if_one_sound_is_playing_it_stops_immediately(
             self, capfd: pytest.CaptureFixture, mock_invoke_play_sound_times
@@ -603,11 +603,11 @@ class TestSounds:
             sound = Sounds()
             mock_invoke_play_sound_times(2, sound)
 
-            assert sound.is_playing == True
+            assert sound.is_playing is True
 
             sound.stop_sound()
 
-            assert sound.is_playing == False
+            assert sound.is_playing is False
 
         def test_returns_true_if_any_sound_was_stopped_playing(
             self, mock_invoke_play_sound_times
@@ -617,7 +617,7 @@ class TestSounds:
 
             a_sound_was_stopped = sound.stop_sound()
 
-            assert a_sound_was_stopped == True
+            assert a_sound_was_stopped is True
 
         def test_a_specific_sound_can_be_stopped(self, mock_invoke_play_sound_times):
             sound = Sounds()
@@ -631,9 +631,3 @@ class TestSounds:
 
             assert len(sound._play_objects) == 3
             assert specific_sound not in sound._play_objects
-
-
-###----------------------------------
-# Methods to do:
-
-# stop_sound

@@ -1,12 +1,11 @@
 import os
-from move_alarm.utils.oauth import HandleAuthorisation
-from move_alarm.utils.config import Configuration
-from move_alarm.types.contexts import Contexts
+from move_alarm import utils
+import move_alarm.datatypes as datatype
 
-cache: Contexts | None = None
+cache: datatype.Contexts | None = None
 
 
-def use_context() -> Contexts:
+def use_context() -> datatype.Contexts:
     global cache
 
     if cache != None:
@@ -14,6 +13,8 @@ def use_context() -> Contexts:
 
     config_path = os.path.join(os.path.dirname(__file__)[:-8], "config.ini")
 
-    cache = Contexts(HandleAuthorisation(), Configuration(config_path))
+    cache = datatype.Contexts(
+        utils.HandleAuthorisation(), utils.Configuration(config_path)
+    )
 
     return cache

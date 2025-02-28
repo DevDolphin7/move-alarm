@@ -1,8 +1,8 @@
 import configparser, datetime, os
-import move_alarm.types as datatype
+import move_alarm.datatypes as datatype
 
 
-class Configuration:
+class Configuration(datatype.Config):
 
     @property
     def config_path(self) -> str:
