@@ -5,14 +5,12 @@ from move_alarm.contexts import use_context
 from move_alarm import components
 import move_alarm.datatypes as datatype
 
-lock = threading.Lock()
-
 
 class Alarm:
     _sounds: datatype.Sounds = components.Sounds()
-    __time: datetime = datetime.fromtimestamp(0)
-    __stop_alarm: bool = False
-    __lock = None
+    _stop_alarm: bool = False
+    _time: datetime = datetime.fromtimestamp(0)
+    _lock = threading.Lock()
 
     @property
     def is_set(self) -> bool:
@@ -24,7 +22,7 @@ class Alarm:
 
     @property
     def time(self) -> datetime:
-        return self.__time
+        return self._time
 
     @property
     def sounds(self) -> datatype.Sounds:
@@ -32,7 +30,7 @@ class Alarm:
 
     def set_alarm(self, snooze: bool = False) -> datetime:
         if self.is_set and not snooze:
-            return self.__time
+            return self._time
 
         config = use_context().config
 
@@ -44,17 +42,17 @@ class Alarm:
         set_alarm.name = "MoveAlarm"
         set_alarm.start()
 
-        self.__time = datetime.now() + config.wait_duration
+        self._time = datetime.now() + config.wait_duration
 
-        return self.__time
+        return self._time
 
     def thread_alarm(self, interval) -> None:
-        print(self.__stop_alarm)
         for _ in range(0, interval):
-            with lock:
-                if self.__stop_alarm:
-                    print("Stopping early!")
-                    self.__stop_alarm = False
+            with self._lock:
+                if self._stop_alarm:
+                    self._stop_alarm = False
+                    self._time = datetime.fromtimestamp(0)
+                    print("Alarm removed")
                     return
 
             time.sleep(1)
@@ -70,7 +68,7 @@ class Alarm:
         config = use_context().config
 
         if self.sounds.is_playing is False:
-            self.__time = self.__time + config.snooze_duration
+            self._time = self._time + config.snooze_duration
         else:
             self.sounds.stop_sound()
             self.set_alarm(snooze=True)
@@ -78,9 +76,12 @@ class Alarm:
         return self.time
 
     def remove_alarm(self) -> bool:
-        print("remove called")
+        if self.sounds.is_playing:
+            return self.sounds.stop_sound()
+
         for thread in threading.enumerate():
             if thread.name == "MoveAlarm":
-                with lock:
-                    self.__stop_alarm = True
-                print(f"__stop_alarm set to {self.__stop_alarm}")
+                with self._lock:
+                    self._stop_alarm = True
+                    return True
+        return False

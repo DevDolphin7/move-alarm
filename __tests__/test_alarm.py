@@ -44,12 +44,9 @@ class TestAlarm:
 
     @pytest.fixture(name="Mock time.sleep")
     def mock_time_sleep(self, monkeypatch: pytest.MonkeyPatch):
-        def long_non_threaded_io_process():
-            sleep(5)
-
         monkeypatch.setattr(
             "time.sleep",
-            lambda *args: long_non_threaded_io_process,
+            lambda *args: None,
         )
 
     @pytest.fixture
@@ -61,24 +58,16 @@ class TestAlarm:
 
         return _wait_for_separate_threads
 
-    @pytest.fixture(name="Mock sounds.play_sound")
-    def mock_sounds_play_sound(self, monkeypatch: pytest.MonkeyPatch):
-        monkeypatch.setattr(
-            Alarm._sounds,
-            "play_sound",
-            lambda: print("Sound is playing!"),
-        )
-
-    @pytest.fixture(name="Mock sounds.play_sound to keep thread alive 10ms")
-    def mock_sounds_play_sound_keep_thread_alive_10_ms(
+    @pytest.fixture(name="Mock sounds.play_sound to keep thread alive 1ms")
+    def mock_sounds_play_sound_keep_thread_alive_1_ms(
         self, monkeypatch: pytest.MonkeyPatch
     ):
-        """10 ms used as a balence between keeping the thread alive and fast testing"""
+        """1 ms used as a balence between keeping the thread alive and fast testing"""
 
         monkeypatch.setattr(
             Alarm._sounds,
             "play_sound",
-            lambda: sleep(0.01),
+            lambda: sleep(0.001),
         )
 
     @pytest.fixture(name="Mock sounds.is_playing")
@@ -110,8 +99,10 @@ class TestAlarm:
 
     @pytest.fixture
     def mock_set_alarm(self, monkeypatch: pytest.MonkeyPatch):
-        def mock_alarm_thread(self):
-            thread = threading.Thread(target=sleep, args=[1])
+        def mock_alarm_thread(alarm_self: Alarm):
+            alarm_self._time = datetime.now() + self.mock_config.wait_duration
+
+            thread = threading.Thread(target=alarm_self.thread_alarm, args=[5])
             thread.name = "MoveAlarm"
             thread.start()
 
@@ -121,7 +112,44 @@ class TestAlarm:
             mock_alarm_thread,
         )
 
+        monkeypatch.setattr(
+            "time.sleep",
+            lambda *args: sleep(0.001),
+        )
+
         return lambda alarm: alarm.set_alarm()
+
+    @pytest.fixture
+    def mock_remove_alarm(self, monkeypatch: pytest.MonkeyPatch):
+        def mock_remove_thread(alarm_self: Alarm):
+            if alarm_self.sounds.is_playing:
+                return alarm_self.sounds.stop_sound()
+
+            for thread in threading.enumerate():
+                if thread.name == "MoveAlarm":
+                    with alarm_self._lock:
+                        alarm_self._stop_alarm = True
+
+        monkeypatch.setattr(
+            Alarm,
+            "remove_alarm",
+            mock_remove_thread,
+        )
+
+        return lambda alarm: alarm.remove_alarm()
+
+    @pytest.fixture
+    def mock_snooze_alarm(self, monkeypatch: pytest.MonkeyPatch):
+        def mock_snooze(alarm_self: Alarm):
+            alarm_self._time = alarm_self._time + self.mock_config.snooze_duration
+
+        monkeypatch.setattr(
+            Alarm,
+            "snooze_alarm",
+            mock_snooze,
+        )
+
+        return lambda alarm: alarm.snooze_alarm()
 
     @pytest.mark.usefixtures("Mock Context")
     class TestInitiation:
@@ -142,6 +170,84 @@ class TestAlarm:
             assert alarm.time == datetime.fromtimestamp(0)
 
     @pytest.mark.usefixtures("Mock Context")
+    class TestIsSet:
+        def test_returns_true_if_sound_is_waiting_to_be_played(
+            self, mock_set_alarm, mock_remove_alarm, wait_for_separate_threads
+        ):
+            alarm = Alarm()
+
+            assert alarm.is_set is False
+
+            mock_set_alarm(alarm)
+            was_set = alarm.is_set
+
+            mock_remove_alarm(alarm)
+            wait_for_separate_threads()
+
+            assert was_set is True
+            assert alarm.is_set is False
+
+        def test_returns_true_if_alarm_snoozed_and_still_waiting_to_play(
+            self,
+            mock_set_alarm,
+            mock_snooze_alarm,
+            mock_remove_alarm,
+            wait_for_separate_threads,
+        ):
+            alarm = Alarm()
+
+            assert alarm.is_set is False
+
+            mock_set_alarm(alarm)
+
+            mock_snooze_alarm(alarm)
+            set_after_snooze = alarm.is_set
+
+            mock_remove_alarm(alarm)
+            wait_for_separate_threads()
+
+            assert set_after_snooze is True
+            assert alarm.is_set is False
+
+        @pytest.mark.usefixtures("Mock sounds.play_sound to keep thread alive 1ms")
+        def test_returns_true_if_alarm_is_currently_playing(
+            self,
+            monkeypatch: pytest.MonkeyPatch,
+            mock_set_alarm,
+            wait_for_separate_threads,
+        ):
+            monkeypatch.setattr(
+                Alarm._sounds,
+                "_play_objects",
+                [None],
+            )
+
+            alarm = Alarm()
+
+            mock_set_alarm(alarm)
+            was_set = alarm.is_set
+
+            wait_for_separate_threads()
+
+            assert alarm.sounds.is_playing is True
+            assert was_set is True
+
+        def test_returns_false_if_no_alarm_is_waiting_or_currently_playing(
+            self, mock_set_alarm, mock_remove_alarm, wait_for_separate_threads
+        ):
+            alarm = Alarm()
+
+            assert alarm.is_set is False
+
+            mock_set_alarm(alarm)
+            was_set = alarm.is_set
+            mock_remove_alarm(alarm)
+            wait_for_separate_threads()
+
+            assert was_set is True
+            assert alarm.is_set is False
+
+    @pytest.mark.usefixtures("Mock Context")
     class TestSetAlarm:
 
         @property
@@ -157,20 +263,20 @@ class TestAlarm:
             return TestAlarm.mock_config.fget(self)
 
         @pytest.mark.usefixtures("Mock time.sleep")
-        @pytest.mark.usefixtures("Mock sounds.play_sound to keep thread alive 10ms")
+        @pytest.mark.usefixtures("Mock sounds.play_sound to keep thread alive 1ms")
         def test_updates_is_set_to_true(self, wait_for_separate_threads):
             alarm = Alarm()
 
             assert alarm.is_set is False
 
             alarm.set_alarm()
-            set = alarm.is_set
+            was_set = alarm.is_set
 
             wait_for_separate_threads()
 
-            assert set is True
+            assert was_set is True
 
-        @pytest.mark.usefixtures("Mock sounds.play_sound to keep thread alive 10ms")
+        @pytest.mark.usefixtures("Mock sounds.play_sound to keep thread alive 1ms")
         def test_waits_for_interval_without_halting_program(
             self, mocker: pytest_mock.MockerFixture, wait_for_separate_threads
         ):
@@ -181,11 +287,11 @@ class TestAlarm:
 
             alarm = Alarm()
             alarm.set_alarm()
-            alarm_was_set = alarm.is_set
+            was_set = alarm.is_set
 
             wait_for_separate_threads()
 
-            assert alarm_was_set is True
+            assert was_set is True
 
             expected_calls = [
                 mocker.call.time_sleep(1)
@@ -226,7 +332,7 @@ class TestAlarm:
             )
 
         @pytest.mark.usefixtures("Mock time.sleep")
-        @pytest.mark.usefixtures("Mock sounds.play_sound")
+        @pytest.mark.usefixtures("Mock sounds.play_sound to keep thread alive 1ms")
         def test_returns_datetime_of_when_the_alarm_will_sound(
             self, wait_for_separate_threads
         ):
@@ -244,7 +350,7 @@ class TestAlarm:
             assert formatted_output == formatted_expected
 
         @pytest.mark.usefixtures("Mock time.sleep")
-        @pytest.mark.usefixtures("Mock sounds.play_sound")
+        @pytest.mark.usefixtures("Mock sounds.play_sound to keep thread alive 1ms")
         def test_updates_time_property_with_datetime(self, wait_for_separate_threads):
             alarm = Alarm()
 
@@ -253,24 +359,21 @@ class TestAlarm:
             expected = datetime.now() + self.config.wait_duration
 
             alarm.set_alarm()
-
-            assert alarm.time is not None
+            wait_for_separate_threads()
 
             formatted_time = alarm.time.strftime("%d/%m/%Y %H:%M:%S")
             formatted_expected = expected.strftime("%d/%m/%Y %H:%M:%S")
 
-            wait_for_separate_threads()
-
             assert formatted_time == formatted_expected
 
         @pytest.mark.usefixtures("Mock time.sleep")
-        @pytest.mark.usefixtures("Mock sounds.play_sound")
+        @pytest.mark.usefixtures("Mock sounds.play_sound to keep thread alive 1ms")
         def test_if_alarm_is_already_set_only_returns_current_set_time(
             self, wait_for_separate_threads
         ):
             alarm = Alarm()
-            expected = alarm.set_alarm()
 
+            expected = alarm.set_alarm()
             second_call = alarm.set_alarm()
 
             wait_for_separate_threads()
@@ -317,33 +420,39 @@ class TestAlarm:
 
         @pytest.mark.usefixtures("Mock Alarm.is_set to True")
         @pytest.mark.usefixtures("Mock time.sleep")
-        @pytest.mark.usefixtures("Mock sounds.play_sound")
+        @pytest.mark.usefixtures("Mock sounds.play_sound to keep thread alive 1ms")
         @pytest.mark.usefixtures("Mock sounds.is_playing")
         def test_if_sound_is_playing_invokes_stop_sound(
-            self, mocker: pytest_mock.MockerFixture
+            self, mocker: pytest_mock.MockerFixture, wait_for_separate_threads
         ):
             mock_stop_sound = mocker.patch(
                 "move_alarm.components.Alarm._sounds.stop_sound"
             )
 
             alarm = Alarm()
-            assert alarm.sounds.is_playing is True
+            was_playing = alarm.sounds.is_playing
 
             alarm.snooze_alarm()
 
+            wait_for_separate_threads()
+
+            assert was_playing is True
             mock_stop_sound.assert_called_once()
 
         @pytest.mark.usefixtures("Mock Alarm.is_set to True")
         @pytest.mark.usefixtures("Mock sounds.is_playing")
         def test_if_sound_is_playing_sound_plays_after_snooze_duration(
-            self, mocker: pytest_mock.MockerFixture
+            self, mocker: pytest_mock.MockerFixture, wait_for_separate_threads
         ):
             mock_thread_alarm = mocker.patch("move_alarm.components.Alarm.thread_alarm")
 
             alarm = Alarm()
-            assert alarm.sounds.is_playing is True
+            was_playing = alarm.sounds.is_playing
 
             alarm.snooze_alarm()
+            wait_for_separate_threads()
+
+            assert was_playing is True
 
             mock_thread_alarm.assert_called_once_with(
                 self.config.snooze_duration.seconds
@@ -352,6 +461,9 @@ class TestAlarm:
         @pytest.mark.usefixtures("Mock Alarm.is_set to True")
         def test_returns_the_new_datetime_the_sound_will_alarm(self):
             alarm = Alarm()
+
+            assert alarm.is_set is True
+            assert alarm.sounds.is_playing is False
 
             original_time = alarm.time
             snoozed_time = alarm.snooze_alarm()
@@ -363,6 +475,9 @@ class TestAlarm:
         def test_updates_the_time_property_with_new_alarm_datetime(self):
             alarm = Alarm()
 
+            assert alarm.is_set is True
+            assert alarm.sounds.is_playing is False
+
             original_time = alarm.time
             alarm.snooze_alarm()
 
@@ -372,17 +487,112 @@ class TestAlarm:
     @pytest.mark.usefixtures("Mock Context")
     class TestRemoveAlarm:
 
-        def test_if_an_alarm_is_set_removes_it(
+        @property
+        def wav_directory(self) -> str:
+            try:
+                return self._wav_directory
+            except:
+                self._wav_directory = TestAlarm.wav_directory.fget(self)
+                return self._wav_directory
+
+        @property
+        def config(self) -> datatype.Config:
+            return TestAlarm.mock_config.fget(self)
+
+        def test_if_an_alarm_is_set_removes_it_and_updates_is_set_property(
             self, mock_set_alarm, wait_for_separate_threads
         ):
             alarm = Alarm()
             mock_set_alarm(alarm)
 
             assert alarm.is_set is True
+            assert alarm._stop_alarm is False
 
             alarm.remove_alarm()
-            alarm_was_set = alarm.is_set
+            thread_to_be_stopped = alarm._stop_alarm
 
             wait_for_separate_threads()
 
-            assert alarm_was_set is False
+            assert thread_to_be_stopped is True
+            assert alarm._stop_alarm is False
+            assert alarm.is_set is False
+
+        def test_return_bool_false_if_no_alarm_is_set(self):
+            alarm = Alarm()
+
+            alarm_removed = alarm.remove_alarm()
+
+            assert alarm_removed is False
+
+        def test_return_bool_tru_if_an_alarm_was_removed(
+            self, mock_set_alarm, wait_for_separate_threads
+        ):
+            alarm = Alarm()
+            mock_set_alarm(alarm)
+
+            alarm_removed = alarm.remove_alarm()
+
+            wait_for_separate_threads()
+
+            assert alarm_removed is True
+
+        def test_if_alarm_removed_updates_time_property_to_unix_0(
+            self, mock_set_alarm, wait_for_separate_threads
+        ):
+            alarm = Alarm()
+
+            expected_set_time = datetime.now() + self.config.wait_duration
+            expected_removed_time = datetime.fromtimestamp(0)
+
+            mock_set_alarm(alarm)
+
+            set_time = alarm.time
+
+            alarm.remove_alarm()
+
+            wait_for_separate_threads()
+
+            str_expected_set_time = expected_set_time.strftime("%d/%m/%Y %H:%M:%S")
+            str_set_time = set_time.strftime("%d/%m/%Y %H:%M:%S")
+            str_expected_removed = expected_removed_time.strftime("%d/%m/%Y %H:%M:%S")
+            str_removed = alarm.time.strftime("%d/%m/%Y %H:%M:%S")
+
+            assert str_set_time == str_expected_set_time
+            assert str_removed == str_expected_removed
+
+        def test_if_an_alarm_was_removed_informs_the_user(
+            self,
+            mock_set_alarm,
+            wait_for_separate_threads,
+            capfd: pytest.CaptureFixture,
+        ):
+            alarm = Alarm()
+            mock_set_alarm(alarm)
+
+            alarm.remove_alarm()
+
+            wait_for_separate_threads()
+
+            out, err = capfd.readouterr()
+
+            assert out == "Alarm removed\n"
+
+        @pytest.mark.usefixtures("Mock sounds.is_playing")
+        def test_if_a_sounds_is_currently_playing_invokes_stop_sound_and_returns_result(
+            self, mocker: pytest_mock.MockerFixture, wait_for_separate_threads
+        ):
+            mock_stop_sound = mocker.patch(
+                "move_alarm.components.Alarm._sounds.stop_sound",
+                return_value="Result from stop_sound()",
+            )
+
+            alarm = Alarm()
+
+            assert alarm.sounds.is_playing is True
+
+            sounding_alarm_removed = alarm.remove_alarm()
+
+            wait_for_separate_threads()
+
+            mock_stop_sound.assert_called_once()
+            assert sounding_alarm_removed == "Result from stop_sound()"
