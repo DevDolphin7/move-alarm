@@ -93,19 +93,19 @@ Then the alarm is removed and will not sound
 
 #### is_set
 
-- return bool
 - returns true if the alarm _is_ waiting to play
 - returns true if the alarm was snoozed and _is_ still waiting to play
+- returns true if the alarm is currently playing
 - returns false if the alarm **is not** waiting to play
-- returns false if the alarm is currently playing and no further alarm is set
 
 #### remove_alarm
 
-- if an alarm is set, removes it
-- if alarm was removed, updates alarm set property
+- if an alarm is set, removes it and updates alarm set property
 - return bool: false if no alarm is set
 - return bool: true on success
-- update time property to None
+- if an alarm was removed, update time property to unix 0
+- informs the user the alarm was removed on success
+- if sound is currently playing, invokes stop sound and returns result
 
 ### Properties
 
