@@ -89,7 +89,10 @@ class Configuration(datatype.Config):
         try:
             self.load_config_file()
         except Exception as error:
-            print(f"Warning: {Warning(error)}\nUsing default values...")
+            if error.args[0] == self.config_path:
+                print(f"File not found: {error}\nUsing default values...")
+            else:
+                print(f"Warning: {Warning(error)}\nUsing default values...")
             self.use_default_values()
             self.set_config_file()
 
