@@ -21,7 +21,7 @@ requires = ["poetry-core>=2.0.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.scripts]
-move-alarm = "move_alarm.app:main"
+move-alarm = "move_alarm.app:App"
 
 [tool.poetry.group.test.dependencies]
 pytest = "^8.3.4"
