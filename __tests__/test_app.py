@@ -40,7 +40,18 @@ class TestApp:
 
         monkeypatch.setattr("move_alarm.app.use_context", lambda: mock_contexts)
 
-    @pytest.fixture(name="Prevent set_config_file initiation call creating a new file")
+    @pytest.fixture(name="Raise FileNotFoundError from load_config_file")
+    def file_not_found_load_config_file(self, monkeypatch: pytest.MonkeyPatch):
+        def raise_file_not_found(config_self: utils.Configuration, *args):
+            raise FileNotFoundError(config_self.config_path)
+
+        monkeypatch.setattr(
+            utils.Configuration,
+            "load_config_file",
+            raise_file_not_found,
+        )
+
+    @pytest.fixture(name="Prevent set_config_file creating a new file")
     def prevent_set_config_file(self, monkeypatch: pytest.MonkeyPatch):
         monkeypatch.setattr(
             utils.Configuration,
@@ -61,7 +72,6 @@ class TestApp:
             "move_alarm.app.InteractiveConsole.interact", lambda *args: None
         )
 
-    @pytest.mark.usefixtures("prevent REPL welcome and exit message")
     class TestInitialisation:
 
         @property
@@ -77,11 +87,10 @@ class TestApp:
             return TestApp.mock_config.fget(self)
 
         @pytest.mark.usefixtures("Mock Context")
-        def test_config_file_loaded_on_initialisation(self, mock_input_to_terminal):
+        @pytest.mark.usefixtures("prevent REPL welcome and exit message")
+        def test_config_file_loaded_on_initialisation(self):
             print("test1")
             app = App()
-
-            mock_input_to_terminal("exit()")
 
             assert isinstance(app.config, datatype.Config) is True
 
@@ -90,15 +99,13 @@ class TestApp:
                 assert key in app_config_attributes
                 assert type(getattr(self.config, key)) == type(getattr(app.config, key))
 
-        @pytest.mark.usefixtures(
-            "Prevent set_config_file initiation call creating a new file"
-        )
+        @pytest.mark.usefixtures("Raise FileNotFoundError from load_config_file")
+        @pytest.mark.usefixtures("Prevent set_config_file creating a new file")
+        @pytest.mark.usefixtures("prevent REPL welcome and exit message")
         def test_user_is_warned_if_config_has_to_load_from_defaults(
-            self, mock_input_to_terminal, capfd: pytest.CaptureFixture
+            self, capfd: pytest.CaptureFixture
         ):
             App()
-
-            mock_input_to_terminal("exit()")
 
             out, err = capfd.readouterr()
 
@@ -108,8 +115,19 @@ class TestApp:
 
             assert out == f"File not found: {config_path}\nUsing default values...\n"
 
-        @pytest.mark.skip
-        def test_user_has_access_to_the_repl_environment(self, mock_input_to_terminal):
+        @pytest.mark.usefixtures("Mock Context")
+        @pytest.mark.usefixtures("prevent REPL welcome and exit message")
+        def test_user_has_access_to_the_repl_environment(
+            self, mock_input_to_terminal, capfd: pytest.CaptureFixture
+        ):
             app = App()
 
-            mock_input_to_terminal("")
+            mock_input_to_terminal("config")
+
+            out, err = capfd.readouterr()
+
+            mock_input_to_terminal("exit()")
+
+            print(out)
+
+            assert 1 == 0
