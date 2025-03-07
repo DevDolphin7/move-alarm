@@ -1,5 +1,6 @@
 import sys
 import code
+import time
 from move_alarm.contexts import use_context
 from move_alarm import components
 import move_alarm.datatypes as datatype
@@ -12,6 +13,8 @@ class App(code.InteractiveConsole):
         return self._config
 
     def __init__(self) -> None:
+        # self.__command_history = []
+
         self._config = use_context().config
         self.variables = {"config": self.config}
 
@@ -35,26 +38,44 @@ license: MIT
         )
 
     def push(self, line: str) -> bool:
-        command = line.strip().lower()
+        lines = line.split(" ")
+        command = lines[0].strip().lower()
+
+        # self.__command_history.append(command)
 
         match command:
+            case "":
+                pass
+
             case "help":
                 self.help()
-                return False
+
             case c if c == "exit" or c == "quit":
                 self.exit()
-                return False
+
             case "start":
                 self.start()
-                return False
+
             case "snooze":
                 self.snooze()
-                return False
+
             case "stop":
                 self.stop()
-                return False
-            case _:
-                return super().push(line)
+
+            case "test":
+                self.test()
+
+            case "set":
+                lines.pop(0)
+                self.set(lines)
+
+            # case c if c == "^[[A":
+            #     print(self.__command_history[0])
+
+            case invalid:
+                print(f"Command not found: {invalid}")
+
+        return False
 
     def help(self) -> None:
         print(
@@ -86,8 +107,49 @@ license: MIT
             f"Alarm snoozed for {int(self.config.snooze_duration.total_seconds() / 60)} minutes, it will now sound at {time}"
         )
 
-    def stop(self) -> None:
-        print(self.alarm.remove_alarm())
+    def stop(self, timeout=2) -> None:
+        self.alarm.remove_alarm()
+
+        loop_range = int(timeout / 0.05)
+
+        for i in range(0, loop_range):
+            time.sleep(0.05)
+            if self.alarm.is_set == False:
+                return
+
+        print("An unexpected problem occured, the alarm is not set")
+
+    def test(self) -> None:
+        print("Playing a sound now...")
+        self.alarm.sounds.play_sound()
+        print("Sound should have stopped!")
+
+    def set(self, args: list[str]) -> None:
+        option = args[0].strip().lower()
+
+        if len(args) == 0 or (option != "themes" and len(args) > 2):
+            self.set_help()
+            return
+
+        match option:
+            case "interval":
+                print("to sort interval function")
+
+    def set_help(self):
+        print(
+            """
+Displaying valid options for set. Use as below:
+set [option] [value]
+
+[option]    [example value]
+interval    30                      --> How long to wait beteen alarms in minutes: int
+snooze      10                      --> How long to snooze a set alarm in minutes: int
+message     "Alarm sounding!"       --> Message to show when alarm goes off: str
+path        "/wav_files/directory/" --> Directory containing wav files for alarm to play: str
+freesound   True                    --> Enables searching the freesound API: bool
+themes      piano "acoustic guitar" --> The themes for searching freesound: space separated string
+"""
+        )
 
 
 def main():
