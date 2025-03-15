@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from datetime import timedelta
+from typing import Callable
 
 
 @dataclass
@@ -10,6 +11,7 @@ class Config:
     wav_directory: str
     api_enabled: bool
     sound_themes: list[str]
+    set_config_file: Callable[[], None]
 
 
 class IniFormattedAlarm(dict[str, int | str]):
