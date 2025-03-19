@@ -2,6 +2,7 @@ import sys
 import code
 import time
 import re
+import os
 from datetime import timedelta
 from move_alarm.contexts import use_context
 from move_alarm import components
@@ -19,6 +20,8 @@ class App(code.InteractiveConsole):
 
         self._config = use_context().config
         self.variables = {"config": self.config}
+
+        self._started = False
 
         self.alarm = components.Alarm()
 
@@ -40,16 +43,25 @@ license: MIT
         )
 
     def push(self, line: str) -> bool:
-        quotation_check = re.match('(.*?)"(.*?)"', line)
+        words: list[str] = []
 
-        try:
-            instructions = quotation_check.groups()
-            lines = instructions[0].strip().split(" ")
-            lines.append(instructions[1])
-        except AttributeError:
-            lines = line.split(" ")
+        for char in ['"', "'"]:
+            char_check: list[str] = re.findall(f" {char}(.*?){char}", line)
 
-        command = lines[0].strip().lower()
+            for text in char_check:
+                if text.find('"') != -1 or text.find("'") != -1:
+                    print("Please do not combine ' followed by \"")
+                    self.set_help()
+                    return
+
+                text = text.strip()
+                words.append(text)
+                line = line.replace(f" {char}{text}{char}", "")
+
+        for count, word in enumerate(line.split(" ")):
+            words.insert(count, word)
+
+        command = words[0].strip().lower()
 
         # self.__command_history.append(command)
 
@@ -76,8 +88,8 @@ license: MIT
                 self.test()
 
             case "set":
-                lines.pop(0)
-                self.set(lines)
+                words.pop(0)
+                self.set(words)
 
             # case c if c == "^[[A":
             #     print(self.__command_history[0])
@@ -99,12 +111,20 @@ license: MIT
         self.push("exit()")
 
     def start(self) -> None:
-        time = self.alarm.set_alarm().strftime("%d/%m/%Y, %H:%M:%S")
+        self._started = True
 
-        if self.alarm.is_set == True:
-            print(f"Alarm set for {time}")
-        else:
-            print("An unexpected problem occured, the alarm is not set")
+        while self._started:
+            if self.alarm.is_set == False:
+                self.alarm.set_alarm()
+
+                if self.alarm.is_set == True:
+                    alarm_time = self.alarm.time.strftime("%d/%m/%Y, %H:%M:%S")
+                    print(f"Alarm set for {alarm_time}")
+                else:
+                    print("An unexpected problem occured, the alarm is not set")
+                    return
+
+            time.sleep(1)
 
     def snooze(self) -> None:
         try:
@@ -118,6 +138,7 @@ license: MIT
         )
 
     def stop(self, timeout=2) -> None:
+        self._started = False
         self.alarm.remove_alarm()
 
         loop_range = int(timeout / 0.05)
@@ -135,46 +156,53 @@ license: MIT
         print("Sound should have stopped!")
 
     def set(self, args: list[str]) -> None:
-        if len(args) == 0 or len(args) > 2:
-            print("set requires 1 or 2 arguments!")
+        if len(args) < 2:
+            print("'set' requires at least 2 arguments!")
             self.set_help()
             return
 
-        option = args[0].strip().lower()
+        option, value, *themes = map(lambda input: input.strip().lower(), args)
 
-        if len(args) == 1 and option != "themes":
-            print("Invalid number of arguments!")
+        if len(themes) > 0 and option != "themes":
+            print(f"'set' requires a valid option and value, displaying help.")
             self.set_help()
             return
 
         match option:
             case "interval":
-                self.set_interval(args[1])
+                self.set_interval(value)
             case "snooze":
-                self.set_snooze(args[1])
+                self.set_snooze(value)
             case "message":
-                self.set_message(args[1])
+                self.set_message(value)
             case "path":
-                self.set_path(args[1])
+                self.set_path(value)
+            case "freesound":
+                self.set_freesound(value)
+            case "themes":
+                self.set_themes([value, *themes])
+            case _:
+                print(f"Option provided for 'set' not recognised: '{option}'")
+                self.set_help()
 
     def set_help(self):
         print(
             """
-Displaying valid options for set. Use as below:
+Displaying valid options for 'set'. Use as below:
 set [option] [value]
 
 [option]    [example value]
 interval    30                      --> How long to wait beteen alarms in minutes: int
 snooze      10                      --> How long to snooze a set alarm in minutes: int
-message     "Alarm sounding!"       --> Message to show when alarm goes off: str
-path        "/wav_files/directory/" --> Directory containing wav files for alarm to play: str
-freesound   True                    --> Enables searching the freesound API: bool
+message     "Alarm sounding!"       --> Message that will show when the alarm goes off: str
+path        "/wav_files/directory/" --> Directory containing wav files for the alarm to play: str
+freesound   True                    --> Enable searching the freesound API: "true", "1" or "yes"
 themes      piano "acoustic guitar" --> The themes for searching freesound: space separated string
 """
         )
 
     def set_interval(self, minutes: str) -> None:
-        mins_float = self.get_float_from_input(minutes, 1.0, 1439.0)
+        mins_float = self.get_float_from_input(minutes, 0.1, 1439.0)
         if mins_float == -1.0:
             return
 
@@ -195,22 +223,6 @@ themes      piano "acoustic guitar" --> The themes for searching freesound: spac
 
         print(f"Any alarm from now on will snooze for {mins_float} minutes")
 
-    def set_message(self, message: str) -> None:
-        self.config.reminder_text = message
-        self.config.set_config_file()
-
-        print("Message set")
-
-    def set_path(self, path: str) -> None:
-        try:
-            self.config.wav_directory = path
-            self.config.set_config_file()
-        except ValueError as error:
-            print(f"Error: {error}, '{path}' does not exist")
-            return
-
-        print("Path updated")
-
     def get_float_from_input(self, input, min_value, max_value) -> float:
         try:
             mins_float = float(input)
@@ -223,6 +235,42 @@ themes      piano "acoustic guitar" --> The themes for searching freesound: spac
             return -1.0
 
         return mins_float
+
+    def set_message(self, message: str) -> None:
+        self.config.reminder_text = message
+        self.config.set_config_file()
+
+        print("Message set")
+
+    def set_path(self, path: str) -> None:
+        try:
+            self.config.wav_directory = os.path.abspath(path)
+        except ValueError as error:
+            print(f"Error: {error}, '{path}' does not exist")
+            return
+
+        self.config.set_config_file()
+        print("Path updated")
+
+    def set_freesound(self, enabled: str) -> None:
+        valid_enable_inputs = ["true", "1", "yes"]
+
+        self.config.api_enabled = enabled in valid_enable_inputs
+        self.config.set_config_file()
+
+        print(f"Freesound api {'enabled' if self.config.api_enabled else 'disabled'}")
+
+    def set_themes(self, themes: list[str]) -> None:
+        safe_themes: list[str] = []
+
+        for theme in themes:
+            if re.match("^[a-z0-9 $_.+!*'(),]+$", theme, re.I):
+                safe_themes.append(theme)
+
+        self.config.sound_themes = safe_themes
+        self.config.set_config_file()
+
+        print(f"Themes updated: {self.config.sound_themes}")
 
 
 def main():
