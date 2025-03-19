@@ -28,6 +28,7 @@ class TestAlarm:
             wav_directory=self.wav_directory,
             api_enabled=True,
             sound_themes=["piano", "guitar"],
+            set_config_file=lambda *args, **kwargs: None,
         )
 
     @pytest.fixture(name="Mock Context")
