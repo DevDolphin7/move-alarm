@@ -1,8 +1,8 @@
-from move_alarm import contexts
+from move_alarm.contexts import use_context
 
 
 def get_auth_token():
-    auth = contexts.use_context().auth
+    auth = use_context().auth
     token = auth.get_token()
 
     if token is None:
