@@ -1,13 +1,3 @@
-# 🚧 App Under Construction 🏗️
-
-```
-
-
-
-
-
-```
-
 # 🚨 MoveAlarm
 
 MoveAlarm is a command-line application designed to help you stay active by reminding you to move at regular intervals. 🏃‍♂️
