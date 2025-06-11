@@ -50,7 +50,7 @@ license: MIT
                 if text.find('"') != -1 or text.find("'") != -1:
                     print("Please do not combine ' followed by \"")
                     self.set_help()
-                    return
+                    return False
 
                 text = text.strip()
                 words.append(text)
