@@ -16,8 +16,6 @@ class App(code.InteractiveConsole):
         return self._config
 
     def __init__(self) -> None:
-        # self.__command_history = []
-
         self._config = use_context().config
         self.variables = {"config": self.config}
 
@@ -63,8 +61,6 @@ license: MIT
 
         command = words[0].strip().lower()
 
-        # self.__command_history.append(command)
-
         match command:
             case "":
                 pass
@@ -91,9 +87,6 @@ license: MIT
                 words.pop(0)
                 self.set(words)
 
-            # case c if c == "^[[A":
-            #     print(self.__command_history[0])
-
             case invalid:
                 print(f"Command not found: {invalid}")
 
@@ -108,7 +101,7 @@ license: MIT
 
     def exit(self) -> None:
         print("Goodbye :)")
-        self.push("exit()")
+        sys.exit()
 
     def start(self) -> None:
         self._started = True
