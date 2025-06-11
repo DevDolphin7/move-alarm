@@ -1,13 +1,3 @@
-# 🚧 App Under Construction 🏗️
-
-```
-
-
-
-
-
-```
-
 # 🚨 MoveAlarm
 
 MoveAlarm is a command-line application designed to help you stay active by reminding you to move at regular intervals. 🏃‍♂️
@@ -227,3 +217,4 @@ Configuration settings are stored in a local `.ini` file in the root folder. If 
 - Script to automate add to startup process (cross-platform)
 - Check information on recently played sounds (number of sounds could be user defined)
 - Option to have max number of files in directory (after downloading one, it removes one)
+- Command history feature

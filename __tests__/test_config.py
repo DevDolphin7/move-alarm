@@ -45,7 +45,7 @@ class TestConfig:
             "Sounds": datatype.IniFormattedSounds(
                 path=os.path.dirname(__file__),
                 freesound=False,
-                themes=["piano", "guitar"],
+                themes="piano, guitar",
             ),
         }
 
@@ -78,7 +78,7 @@ class TestConfig:
             "Sounds": datatype.IniFormattedSounds(
                 path=os.path.dirname(__file__),
                 freesound=False,
-                themes=["piano"],
+                themes="piano",
             ),
         }
 

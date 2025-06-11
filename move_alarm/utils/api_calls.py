@@ -25,7 +25,7 @@ def search_for_sounds(
     if len(themes) > 0:
         url = url[:-1] + "%20AND%20description:("
 
-        url += "%20OR%20".join([theme for theme in themes]) + "))"
+        url += "%20OR%20".join([theme.replace(" ", "%20") for theme in themes]) + "))"
 
     url += "&fields=id,url,name,description,download,license"
 

@@ -32,6 +32,7 @@ class TestSounds:
             wav_directory=self.wav_directory,
             api_enabled=True,
             sound_themes=["piano", "guitar"],
+            set_config_file=lambda *args, **kwargs: None,
         )
 
     @pytest.fixture(name="Mock Context")
@@ -514,7 +515,7 @@ class TestSounds:
 
             assert isinstance(sound_path, str) is True
             assert os.path.exists(os.path.dirname(sound_path)) is True
-            mock_print.assert_called_once()
+            mock_print.assert_called()
             mock_get_local_file.assert_called_once()
 
     @pytest.mark.usefixtures("Mock Context api_enabled false")
@@ -546,7 +547,7 @@ class TestSounds:
 
             out, err = capfd.readouterr()
 
-            assert out == "play was invoked from MockWaveObject!\n"
+            assert out == "\n -> Time to move!\nplay was invoked from MockWaveObject!\n"
 
         def test_when_the_sound_stops_invokes_stop_sound(
             self, mocker: pytest_mock.MockerFixture

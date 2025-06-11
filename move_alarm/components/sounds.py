@@ -48,6 +48,7 @@ class Sounds(datatype.Sounds):
     def download_from_freesound(self, url: str, new_path: str) -> str:
         token = utils.get_auth_token()
 
+        print(f"Downloading the sound from freesound as {new_path}")
         utils.download_sound(token, url, new_path)
 
         if os.path.exists(new_path):
@@ -59,6 +60,7 @@ class Sounds(datatype.Sounds):
     def get_freesound(self) -> str | None:
         config = use_context().config
 
+        print("\nSearching Freesound for a sound...")
         search_result = self.search_freesound(config.sound_themes)
 
         if isinstance(search_result, datatype.SoundResult):
@@ -80,10 +82,12 @@ class Sounds(datatype.Sounds):
         return self.get_local_file(config.wav_directory)
 
     def play_sound(self) -> None:
+        config = use_context().config
         sound_path = self.get_sound()
 
         wave_obj = sa.WaveObject.from_wave_file(sound_path)
 
+        print("\n ->", config.reminder_text)
         play_object = wave_obj.play()
         self._play_objects.append(play_object)
 

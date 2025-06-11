@@ -1,4 +1,7 @@
-import configparser, datetime, os
+import os
+import datetime
+import configparser
+import json
 import move_alarm.datatypes as datatype
 
 
@@ -89,7 +92,10 @@ class Configuration(datatype.Config):
         try:
             self.load_config_file()
         except Exception as error:
-            print(f"Warning: {Warning(error)}\nUsing default values...")
+            if error.args[0] == self.config_path:
+                print(f"File not found: {error}\nUsing default values...")
+            else:
+                print(f"Warning: {Warning(error)}\nUsing default values...")
             self.use_default_values()
             self.set_config_file()
 
@@ -104,6 +110,8 @@ class Configuration(datatype.Config):
         self.sound_themes = ["funk"]
 
     def define_data_to_save(self) -> datatype.IniFormattedConfig:
+        sound_themes_str = ",".join(self.sound_themes)
+
         return datatype.IniFormattedConfig(
             Alarm=datatype.IniFormattedAlarm(
                 interval=int(self.wait_duration.total_seconds()),
@@ -113,7 +121,7 @@ class Configuration(datatype.Config):
             Sounds=datatype.IniFormattedSounds(
                 path=self.wav_directory,
                 freesound=self.api_enabled,
-                themes=self.sound_themes,
+                themes=sound_themes_str,
             ),
         )
 
@@ -144,6 +152,8 @@ class Configuration(datatype.Config):
         self.reminder_text = config_parser.get("Alarm", "message")
         self.wav_directory = config_parser.get("Sounds", "path")
         self.api_enabled = config_parser.getboolean("Sounds", "freesound")
-        self.sound_themes = list(config_parser.get("Sounds", "themes"))
+
+        themes = config_parser.get("Sounds", "themes").split(",")
+        self.sound_themes = [theme.strip() for theme in themes]
 
         return True
