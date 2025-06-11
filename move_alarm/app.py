@@ -40,7 +40,7 @@ license: MIT
             exitmsg="Goodbye :)",
         )
 
-    def push(self, line: str) -> bool:
+    def push(self, line: str, *args: str | None) -> bool:
         words: list[str] = []
 
         for char in ['"', "'"]:
