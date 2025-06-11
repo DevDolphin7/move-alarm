@@ -1,6 +1,6 @@
 [project]
 name = "move-alarm"
-version = "0.1.0"
+version = "1.0.1"
 description = "An alarm designed to remind you to be more active!"
 authors = [
     {name = "DevDolphin7",email = "devdolphin7@outlook.com"}
